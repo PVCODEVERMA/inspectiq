@@ -184,7 +184,7 @@ export const Sidebar = () => {
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="hidden lg:flex text-slate-400 hover:text-primary hover:bg-slate-50"
+              className="hidden lg:flex text-slate-400 hover:text-white hover:bg-red-500"
             >
               {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </Button>
@@ -290,10 +290,15 @@ export const Sidebar = () => {
             </div>
             {(isMobileOpen || !isCollapsed) && (
               <div className="flex-1 min-w-0 animate-fade-in">
-                <p className="text-sm font-bold text-slate-800 truncate tracking-tight">{userName}</p>
+                <p className="text-sm font-bold text-[#F44034] truncate tracking-tight">{userName}</p>
                 {role && (
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={cn('text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider', getRoleBadge(role)?.class)}>
+                    <span className={cn(
+                      'text-[9px] font-black px-2 py-0.5 rounded-full uppercase',
+                      role === 'master_admin'
+                        ? 'bg-[#F44034]/10 text-[#F44034]'
+                        : 'bg-[#0F172A]/10 text-[#0F172A]'
+                    )}>
                       {getRoleBadge(role)?.label}
                     </span>
                   </div>
@@ -305,7 +310,7 @@ export const Sidebar = () => {
                 variant="ghost"
                 size="icon"
                 onClick={signOut}
-                className="text-slate-400 hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all"
+                className="text-[#F44034] hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />

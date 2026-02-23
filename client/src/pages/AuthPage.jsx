@@ -18,7 +18,9 @@ import {
   Users,
   Building2,
   ChevronLeft,
-  Key
+  Key,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import logo from '@/assets/qcws-logo.png';
 import { toast } from 'react-hot-toast';
@@ -31,6 +33,12 @@ const AuthPage = () => {
 
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register-master'
   const [loginType, setLoginType] = useState('user'); // 'user' or 'master'
+
+  // Password visibility states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
+  const [showMasterPassword, setShowMasterPassword] = useState(false);
+  const [showMasterSecretKey, setShowMasterSecretKey] = useState(false);
 
   // Login State
   const [email, setEmail] = useState('');
@@ -189,44 +197,57 @@ const AuthPage = () => {
         </div>
 
         <div className="flex-1 flex items-center justify-center p-6 md:p-12">
-          <div className="w-full max-w-[440px] space-y-8 animate-slide-up">
+          <div className="w-full max-w-[440px] space-y-4 animate-slide-up">
             <div className="space-y-2">
-              <h3 className="text-4xl font-display font-black text-foreground tracking-tight">
+              {/* <h3 className="text-2xl font-display font-black text-foreground tracking-tight">
                 {authMode === 'login' ? (loginType === 'user' ? 'Sign In' : 'Master Login') : 'Master Setup'}
-              </h3>
-              <p className="text-muted-foreground font-medium">
+              </h3> */}
+              {/* <p className="text-muted-foreground font-medium">
                 {authMode === 'login' ? 'Enter your credentials to access the secure portal.' : 'Complete the initial configuration for the Master Admin.'}
-              </p>
+              </p> */}
             </div>
 
             {/* Role Selection Cards (only for login mode) */}
             {authMode === 'login' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setLoginType('user')}
                   className={cn(
-                    "relative overflow-hidden group p-4 rounded-2xl border-2 transition-all text-left",
+                    "relative overflow-hidden group p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center text-center",
                     loginType === 'user'
-                      ? "border-primary bg-primary/5 ring-4 ring-primary/10"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/10"
                       : "border-border hover:border-primary/50 bg-background/50"
                   )}
                 >
-                  <Users className={cn("w-6 h-6 mb-3", loginType === 'user' ? "text-primary" : "text-muted-foreground")} />
-                  <div className="font-bold text-sm">Standard User</div>
-                  <div className="text-[10px] text-muted-foreground font-medium">Inspectors & Management</div>
+                  <Users
+                    className={cn(
+                      "w-5 h-5 mb-2",
+                      loginType === 'user'
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    )}
+                  />
+                  <div className="font-semibold text-xs">Staff roles</div>
                 </button>
+
                 <button
                   onClick={() => setLoginType('master')}
                   className={cn(
-                    "relative overflow-hidden group p-4 rounded-2xl border-2 transition-all text-left",
+                    "relative overflow-hidden group p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center text-center",
                     loginType === 'master'
-                      ? "border-primary bg-primary/5 ring-4 ring-primary/10"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/10"
                       : "border-border hover:border-primary/50 bg-background/50"
                   )}
                 >
-                  <Key className={cn("w-6 h-6 mb-3", loginType === 'master' ? "text-primary" : "text-muted-foreground")} />
-                  <div className="font-bold text-sm">Master Admin</div>
-                  <div className="text-[10px] text-muted-foreground font-medium">System Configuration</div>
+                  <Key
+                    className={cn(
+                      "w-5 h-5 mb-2",
+                      loginType === 'master'
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    )}
+                  />
+                  <div className="font-semibold text-xs">Master Admin</div>
                 </button>
               </div>
             )}
@@ -245,7 +266,7 @@ const AuthPage = () => {
                         placeholder="Enter your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="pl-12  h-14 bg-background/50 border-border/50 focus:ring-primary/20 transition-all rounded-xl"
+                        className="pl-12 h-14 bg-background/50 border-border/50 focus:ring-primary/20 transition-all rounded-xl"
                         required
                       />
                     </div>
@@ -253,22 +274,28 @@ const AuthPage = () => {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between px-1">
-                      <Label htmlFor="password" title={loginType === 'master' ? 'Admin Password' : 'Password'} className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
+                      <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
                         {loginType === 'master' ? 'Admin Password' : 'Password'}
                       </Label>
-                      <button type="button" className="text-[10px] font-bold text-primary hover:underline">Forgot?</button>
                     </div>
                     <div className="relative group">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                       <Input
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-12 h-14 bg-background/50 border-border/50 focus:ring-primary/20 transition-all rounded-xl"
+                        className="pl-12 pr-12 h-14 bg-background/50 border-border/50 focus:ring-primary/20 transition-all rounded-xl"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
 
@@ -279,13 +306,20 @@ const AuthPage = () => {
                         <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                         <Input
                           id="secretKey"
-                          type="password"
+                          type={showSecretKey ? "text" : "password"}
                           placeholder="Secret Protocol Key"
                           value={secretKey}
                           onChange={(e) => setSecretKey(e.target.value)}
-                          className="pl-12 h-14 bg-background/50 border-border/50 focus:ring-primary/20 transition-all rounded-xl border-primary/20"
+                          className="pl-12 pr-12 h-14 bg-background/50 border-border/50 focus:ring-primary/20 transition-all rounded-xl border-primary/20"
                           required
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowSecretKey(!showSecretKey)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
                       </div>
                     </div>
                   )}
@@ -350,25 +384,44 @@ const AuthPage = () => {
 
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase ml-1 opacity-60">Set Password</Label>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      value={masterRegData.password}
-                      onChange={(e) => setMasterRegData({ ...masterRegData, password: e.target.value })}
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showMasterPassword ? "text" : "password"}
+                        placeholder="Enter a strong password"
+                        value={masterRegData.password}
+                        onChange={(e) => setMasterRegData({ ...masterRegData, password: e.target.value })}
+                        required
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowMasterPassword(!showMasterPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showMasterPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase ml-1 opacity-60">Master Secret Key (System wide)</Label>
-                    <Input
-                      type="password"
-                      placeholder="Protocol Secret"
-                      value={masterRegData.secretKey}
-                      onChange={(e) => setMasterRegData({ ...masterRegData, secretKey: e.target.value })}
-                      required
-                      className="border-primary/20"
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showMasterSecretKey ? "text" : "password"}
+                        placeholder="Protocol Secret"
+                        value={masterRegData.secretKey}
+                        onChange={(e) => setMasterRegData({ ...masterRegData, secretKey: e.target.value })}
+                        required
+                        className="border-primary/20 pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowMasterSecretKey(!showMasterSecretKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showMasterSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
 
                   <Button type="submit" className="w-full h-12 mt-4 font-bold" disabled={isRegisteringMaster}>
