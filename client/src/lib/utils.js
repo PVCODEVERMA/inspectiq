@@ -1,0 +1,13 @@
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
+
+export function getFileUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  const baseUrl = 'http://localhost:5000';
+  return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+}

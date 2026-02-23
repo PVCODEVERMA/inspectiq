@@ -1,0 +1,28 @@
+            </DialogContent>
+          </Dialog>
+        </TabsContent>
+      </Tabs>
+
+      {/* Member Profile Dialog */}
+      <MemberProfileDialog
+        member={selectedMember}
+        isOpen={isProfileDialogOpen}
+        onClose={() => setIsProfileDialogOpen(false)}
+        onRegenerateKey={handleRegenerateKey}
+        onToggleStatus={toggleStatus}
+        onDelete={handleDeleteUser}
+        onOpenChat={handleOpenChat}
+      />
+
+      {/* Chat Dialog */}
+      <ChatDialog
+        member={chatMember}
+        isOpen={isChatDialogOpen}
+        onClose={() => setIsChatDialogOpen(false)}
+        currentUser={user}
+      />
+    </div>
+  );
+};
+
+export default SuperAdminDashboard;
