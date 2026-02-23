@@ -287,13 +287,9 @@ export const IndustrialFormUI = ({
                     <div className="bg-white rounded-[2rem] shadow-premium border border-slate-100 p-6 sm:p-8 mt-8">
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                             <Button variant="outline" size="lg" className="h-14 px-8 rounded-2xl border-2 hover:bg-[#F44034] text-[#F44034] gap-2 font-bold order-2 sm:order-1" onClick={() => navigate(-1)}><ChevronLeft className="w-5 h-5" /> Back</Button>
-                            <div className="flex flex-1 flex-col sm:flex-row gap-3 order-1 sm:order-2">
-                                <Button variant="outline" size="lg" className="flex-1 h-14 rounded-2xl border-2 border-[#201E1E] text-[#201E1E] hover:bg-[#363434] gap-2 font-bold" onClick={() => handleSave(true)} disabled={isLoading}>{isLoading ? "Saving..." : <><Save className="w-5 h-5" /> Save Draft</>}</Button>
-                                <Button size="lg" className="flex-1 h-14 rounded-2xl bg-[#F44034] hover:bg-[#201E1E] shadow-lg shadow-primary/20 gap-2 font-bold" onClick={() => handleSave(false)} disabled={isLoading}><Check className="w-5 h-5" /> Submit Report</Button>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E]" onClick={() => handleSave(true, 'print')} disabled={isLoading}><Printer className="w-5 h-5" /></Button>
-                                    <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E]" onClick={() => handleSave(true, 'download')} disabled={isLoading}><Download className="w-5 h-5" /></Button>
-                                </div>
+                            <div className="flex gap-2 order-1 sm:order-2 flex-1">
+                                <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E]" onClick={() => handleSave(true, 'print')} disabled={isLoading}><Printer className="w-5 h-5" /></Button>
+                                <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] gap-2 font-bold" onClick={() => handleSave(true, 'download')} disabled={isLoading}><Download className="w-5 h-5" /> Generate PDF</Button>
                             </div>
                         </div>
                     </div>
