@@ -124,7 +124,7 @@ const ChatDialog = ({ member, isOpen, onClose, currentUser }) => {
                         </Avatar>
                         <div>
                             <DialogTitle>{member.profile?.full_name || member.email}</DialogTitle>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs  text-muted-foreground">
                                 {member.isOnline ? 'Online' : 'Offline'}
                             </p>
                         </div>

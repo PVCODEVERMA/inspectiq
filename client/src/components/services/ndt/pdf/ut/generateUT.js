@@ -162,7 +162,7 @@ export const generateUT = async (doc, data, currentY, contentWidth, primaryFont,
         body: tableData,
         theme: 'grid',
         headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', fontSize: 9 },
-        bodyStyles: { fontSize: 8, textColor: [0, 0, 0] },
+        bodyStyles: { fontSize: 8, textColor: [0, 0, 0], fillColor: null },
         margin: { left: MARGIN, right: MARGIN, bottom: 40 }, // Safety for footer
         didDrawPage: (d) => {
             if (d.pageNumber > 1 && drawTemplate) {
