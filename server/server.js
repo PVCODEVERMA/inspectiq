@@ -1,3 +1,4 @@
+// server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -23,32 +24,45 @@ if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-// CORS Configuration
+/* =========================
+   🌐 CORS Configuration
+========================= */
+
+// Allowed origins
 const allowedOrigins = [
-  "https://inspectiq-u718.vercel.app",
+  "https://inspectiq-y9l9-834ufv5du-qcwsapp-2732s-projects.vercel.app",
   "http://localhost:8080",
+  "http://localhost:8081",
+  "http://localhost:5173"
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn(`[CORS] Rejected origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
   })
 );
 
-// Body Parser
+// CORS is already handled by app.use() above, including preflights.
+
+/* =========================
+   📝 Body Parser
+========================= */
 app.use(express.json());
 
 /* =========================
    📂 Routes Import
 ========================= */
-
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const profileRoutes = require("./routes/profile");
@@ -70,7 +84,6 @@ const weldingAuditRoutes = require("./routes/consultancy/weldingAssessmentAudit"
 /* =========================
    🚀 Use Routes
 ========================= */
-
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/profile", profileRoutes);
@@ -92,13 +105,11 @@ app.use("/api/consultancy/welding-audit", weldingAuditRoutes);
 /* =========================
    📁 Static Files
 ========================= */
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* =========================
    ❤️ Health Check
 ========================= */
-
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "OK",
@@ -110,7 +121,6 @@ app.get("/health", (req, res) => {
 /* =========================
    🏠 Root Route
 ========================= */
-
 app.get("/", (req, res) => {
   res.send("QCWS Inspection API is running...");
 });
@@ -118,7 +128,6 @@ app.get("/", (req, res) => {
 /* =========================
    ❌ Global Error Handler
 ========================= */
-
 app.use((err, req, res, next) => {
   console.error("SERVER ERROR:", err.message);
   console.error("STACK:", err.stack);
@@ -132,50 +141,32 @@ app.use((err, req, res, next) => {
 /* =========================
    🗄 Database Connection
 ========================= */
-
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("Connected to MongoDB");
 
-    // Optional: Safe index migration - remove unique constraint on report_no from all models
+    // Optional: Migration for report_no index
     const migrateModel = async (modelPath, modelName) => {
       try {
         const Model = require(modelPath);
         const collection = Model.collection;
         const indexes = await collection.indexes();
 
-        // Drop any unique index on report_no
         const uniqueIndex = indexes.find(
           (idx) => idx.key && idx.key.report_no === 1 && idx.unique
         );
+        if (uniqueIndex) await collection.dropIndex(uniqueIndex.name);
 
-        if (uniqueIndex) {
-          await collection.dropIndex(uniqueIndex.name);
-          console.log(`[MIGRATION] ${modelName}: Dropped unique index on report_no`);
-        }
-
-        // Ensure sparse index exists (but not unique)
         const sparseIndex = indexes.find(
           (idx) => idx.key && idx.key.report_no === 1 && idx.sparse && !idx.unique
         );
-
-        if (!sparseIndex) {
-          await collection.createIndex(
-            { report_no: 1 },
-            { sparse: true }
-          );
-          console.log(`[MIGRATION] ${modelName}: Created sparse (non-unique) index on report_no`);
-        }
+        if (!sparseIndex) await collection.createIndex({ report_no: 1 }, { sparse: true });
       } catch (migErr) {
-        console.warn(
-          `[MIGRATION] ${modelName} migration skipped:`,
-          migErr.message
-        );
+        console.warn(`[MIGRATION] ${modelName} migration skipped:`, migErr.message);
       }
     };
 
-    // Run migrations for all report models
     await migrateModel("./models/ndt/LiquidPenetrantInspection", "LiquidPenetrantInspection");
     await migrateModel("./models/ndt/MagneticParticleInspection", "MagneticParticleInspection");
     await migrateModel("./models/ndt/UltrasonicInspection", "UltrasonicInspection");

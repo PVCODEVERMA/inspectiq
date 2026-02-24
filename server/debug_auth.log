@@ -5,3 +5,10 @@ Input Email: [qcwsadmin@gmail.com]
 Env Email: [admin123@gmail.com]
 Trimmed Env Email: [admin123@gmail.com]
 Match: false
+
+--- 2026-02-24T05:40:10.277Z ---
+Register Attempt:
+Input Email: [qcwsadmin@gmail.com]
+Env Email: [qcwsadmin@gmail.com]
+Trimmed Env Email: [qcwsadmin@gmail.com]
+Match: true
