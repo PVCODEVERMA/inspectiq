@@ -60,8 +60,21 @@ export const generateNDTSummary = (doc, data, currentY, contentWidth, primaryFon
         columns: resultsCols,
         body: tableData,
         theme: 'grid',
-        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', fontSize: 9 },
-        bodyStyles: { fontSize: 8, textColor: [0, 0, 0], fillColor: null },
+        headStyles: {
+            fillColor: [240, 240, 240],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold',
+            fontSize: 9,
+            lineWidth: 0.1,
+            lineColor: [0, 0, 0]
+        },
+        bodyStyles: {
+            fontSize: 8,
+            textColor: [0, 0, 0],
+            fillColor: null,
+            lineWidth: 0.1,
+            lineColor: [0, 0, 0]
+        },
         margin: { left: MARGIN, right: MARGIN, bottom: 40 },
         didDrawPage: (d) => {
             if (d.pageNumber > 1 && drawTemplate) {

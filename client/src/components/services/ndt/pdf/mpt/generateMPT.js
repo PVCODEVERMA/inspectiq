@@ -1,68 +1,148 @@
 import { MARGIN, drawInfoRow, drawCheckboxGroup, drawReportHeader } from '@/components/services/common/pdf/PdfUtils';
 import autoTable from 'jspdf-autotable';
+import { format } from 'date-fns';
 
 export const generateMPT = (doc, data, currentY, contentWidth, primaryFont, checkPageBreak, drawTemplate, getBase64Image) => {
-    // 1. Report Header (Client, Report No, Date, Vendor, Location)
-    currentY = drawReportHeader(doc, data, currentY, contentWidth, primaryFont);
+    const safeFormatDate = (dateStr) => {
+        try {
+            if (!dateStr) return format(new Date(), 'dd/MM/yyyy');
+            const d = new Date(dateStr);
+            return isNaN(d.getTime()) ? 'N/A' : format(d, 'dd/MM/yyyy');
+        } catch (e) {
+            return 'N/A';
+        }
+    };
 
-    // 2. Basic Info
-    const basicInfo = [
-        ["MATERIAL SPEC:", data.material_spec, "PROCEDURE NO:", data.procedure_no],
-        ["THICKNESS:", data.thickness, "ACCEPTANCE STANDARD:", data.acceptance_std]
-    ];
-
-    basicInfo.forEach((row) => {
-        currentY = drawInfoRow(doc, row[0], row[1], row[2], row[3], currentY, contentWidth, primaryFont);
-    });
-    currentY += 2;
-
-    // Equipment Section
-    const eqHeight = 28;
-    doc.rect(MARGIN, currentY, contentWidth, eqHeight);
+    // --- BOX 1: GENERAL INFORMATION ---
+    const box1H = 28; // 4 rows x 7mm
+    const midX = MARGIN + (contentWidth / 2);
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.1);
+    doc.rect(MARGIN, currentY, contentWidth, box1H);
 
     // Horizontal lines
     doc.line(MARGIN, currentY + 7, MARGIN + contentWidth, currentY + 7);
     doc.line(MARGIN, currentY + 14, MARGIN + contentWidth, currentY + 14);
     doc.line(MARGIN, currentY + 21, MARGIN + contentWidth, currentY + 21);
 
+    // Vertical line for rows 1 & 2
+    doc.line(midX, currentY, midX, currentY + 14);
+
+    doc.setFontSize(9);
+    // Row 1
+    doc.setFont(primaryFont, "bold");
+    doc.text("CLIENT:", MARGIN + 2, currentY + 5);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.client_name || 'N/A'), MARGIN + 42, currentY + 5);
+
+    doc.setFont(primaryFont, "bold");
+    doc.text("REPORT NO:", midX + 2, currentY + 5);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.report_no || 'Auto-Generated'), midX + 35, currentY + 5);
+
+    // Row 2
+    doc.setFont(primaryFont, "bold");
+    doc.text("VENDOR:", MARGIN + 2, currentY + 12);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.vendor_name || 'N/A'), MARGIN + 42, currentY + 12);
+
+    doc.setFont(primaryFont, "bold");
+    doc.text("DATE:", midX + 2, currentY + 12);
+    doc.setFont(primaryFont, "normal");
+    doc.text(safeFormatDate(data.date), midX + 35, currentY + 12);
+
+    // Row 3 (Full width)
+    doc.setFont(primaryFont, "bold");
+    doc.text("ITEM DETAILS:", MARGIN + 2, currentY + 19);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.item_tested || data.item || data.item_details || 'N/A'), MARGIN + 42, currentY + 19);
+
+    // Row 4 (Full width)
+    doc.setFont(primaryFont, "bold");
+    doc.text("LOCATION:", MARGIN + 2, currentY + 26);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.location || data.site_location || 'N/A'), MARGIN + 42, currentY + 26);
+
+    currentY += box1H + 4;
+
+    // --- BOX 2: MATERIAL SPECIFICATIONS ---
+    const box2H = 14; // 2 rows x 7mm
+    doc.rect(MARGIN, currentY, contentWidth, box2H);
+    doc.line(MARGIN, currentY + 7, MARGIN + contentWidth, currentY + 7);
+    doc.line(midX, currentY, midX, currentY + box2H);
+
+    // Row 1
+    doc.setFont(primaryFont, "bold");
+    doc.text("MATERIAL SPECIFICATIONS:", MARGIN + 2, currentY + 5);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.material_spec || 'N/A'), MARGIN + 50, currentY + 5);
+
+    doc.setFont(primaryFont, "bold");
+    doc.text("PROCEDURE NO:", midX + 2, currentY + 5);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.procedure_no || 'N/A'), midX + 40, currentY + 5);
+
+    // Row 2
+    doc.setFont(primaryFont, "bold");
+    doc.text("THICKNESS:", MARGIN + 2, currentY + 12);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.thickness || 'N/A'), MARGIN + 42, currentY + 12);
+
+    doc.setFont(primaryFont, "bold");
+    doc.text("ACCEPTANCE STANDARD:", midX + 2, currentY + 12);
+    doc.setFont(primaryFont, "normal");
+    doc.text(String(data.acceptance_std || 'N/A'), midX + 40, currentY + 12);
+
+    currentY += box2H + 4;
+
+    // --- BOX 3: EQUIPMENT DETAILS ---
+    currentY = checkPageBreak(currentY, 35);
+
+    const box3H = 28; // 4 rows x 7mm
+    doc.rect(MARGIN, currentY, contentWidth, box3H);
+
+    // Horizontal lines
+    doc.line(MARGIN, currentY + 7, MARGIN + contentWidth, currentY + 7);
+    doc.line(MARGIN, currentY + 14, MARGIN + contentWidth, currentY + 14);
+    doc.line(MARGIN, currentY + 21, MARGIN + contentWidth, currentY + 21);
+
+    // Vertical line in middle
+    doc.line(midX, currentY, midX, currentY + box3H);
+
     // Row 1
     doc.setFont(primaryFont, "bold");
     doc.text("LIGHTING EQUIPMENT:", MARGIN + 2, currentY + 5);
-    const lEqWidth = doc.getTextWidth("LIGHTING EQUIPMENT:");
     doc.setFont(primaryFont, "normal");
-    doc.text(String(data.lighting_equip || ''), MARGIN + 2 + lEqWidth + 2, currentY + 5);
+    doc.text(String(data.lighting_equip || ''), MARGIN + 42, currentY + 5);
 
     doc.setFont(primaryFont, "bold");
-    doc.text("INSTRUMENT MAKE:", MARGIN + (contentWidth / 2) + 2, currentY + 5);
-    const iMkWidth = doc.getTextWidth("INSTRUMENT MAKE:");
+    doc.text("INSTRUMENT MAKE:", midX + 2, currentY + 5);
     doc.setFont(primaryFont, "normal");
-    doc.text(String(data.instrument_make || ''), MARGIN + (contentWidth / 2) + 2 + iMkWidth + 2, currentY + 5);
+    doc.text(String(data.instrument_make || ''), midX + 35, currentY + 5);
 
     // Row 2
     doc.setFont(primaryFont, "bold");
     doc.text("LIGHT INTENSITY:", MARGIN + 2, currentY + 12);
-    const lInWidth = doc.getTextWidth("LIGHT INTENSITY:");
     doc.setFont(primaryFont, "normal");
-    doc.text(String(data.light_intensity || ''), MARGIN + 2 + lInWidth + 2, currentY + 12);
+    doc.text(String(data.light_intensity || ''), MARGIN + 42, currentY + 12);
 
     doc.setFont(primaryFont, "bold");
-    doc.text("INSTRUMENTS ID:", MARGIN + (contentWidth / 2) + 2, currentY + 12);
-    const iIdWidth = doc.getTextWidth("INSTRUMENTS ID:");
+    doc.text("INSTRUMENTS ID:", midX + 2, currentY + 12);
     doc.setFont(primaryFont, "normal");
-    doc.text(String(data.instrument_id || ''), MARGIN + (contentWidth / 2) + 2 + iIdWidth + 2, currentY + 12);
+    doc.text(String(data.instrument_id || ''), midX + 35, currentY + 12);
 
     // Row 3 - Checkboxes
-    drawCheckboxGroup(doc, "TYPE OF INST:", ["YOKE", "PROD"], data.instrument_type, MARGIN + 2, currentY + 19, primaryFont);
-    drawCheckboxGroup(doc, "METHOD:", ["WET", "DRY"], data.method, MARGIN + (contentWidth / 2) + 2, currentY + 19, primaryFont);
+    drawCheckboxGroup(doc, "TYPE OF INSTRUMENTS:", ["YOKE", "PROD"], data.instrument_type, MARGIN + 2, currentY + 19, primaryFont, 9);
+    drawCheckboxGroup(doc, "METHOD:", ["WET", "DRY"], data.method, midX + 2, currentY + 19, primaryFont, 9);
 
     // Row 4 - Checkboxes
-    drawCheckboxGroup(doc, "TYPE OF CURRENT:", ["AC", "DC"], data.current_type, MARGIN + 2, currentY + 26, primaryFont);
-    drawCheckboxGroup(doc, "CONTRAST:", ["YES", "NO"], data.contrast || [], MARGIN + (contentWidth / 2) + 2, currentY + 26, primaryFont);
+    drawCheckboxGroup(doc, "TYPE OF CURRENT:", ["AC", "DC"], data.current_type, MARGIN + 2, currentY + 26, primaryFont, 9);
+    drawCheckboxGroup(doc, "CONTRAST", ["YES", "NO"], data.contrast || [], midX + 2, currentY + 26, primaryFont, 9);
 
-    currentY += eqHeight + 5;
+    currentY += box3H + 6;
 
-    // --- TEST RESULTS Section ---
-    currentY = checkPageBreak(currentY, 30);
+    // --- BOX 4: TEST RESULTS ---
+    currentY = checkPageBreak(currentY, 40);
     doc.setFont(primaryFont, "bold");
     doc.setFontSize(11);
     doc.text("TEST RESULTS", MARGIN, currentY + 5);
@@ -83,8 +163,21 @@ export const generateMPT = (doc, data, currentY, contentWidth, primaryFont, chec
         head: [['ITEM NAME', 'NUMBER OF BARRAGE', 'QTY', 'OBSERVATIONS', 'RESULT']],
         body: tableDataRows,
         theme: 'grid',
-        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', fontSize: 9 },
-        bodyStyles: { fontSize: 8, textColor: [0, 0, 0], fillColor: null },
+        headStyles: {
+            fillColor: [240, 240, 240],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold',
+            fontSize: 9,
+            lineWidth: 0.1,
+            lineColor: [0, 0, 0]
+        },
+        bodyStyles: {
+            fontSize: 8,
+            textColor: [0, 0, 0],
+            fillColor: null,
+            lineWidth: 0.1,
+            lineColor: [0, 0, 0]
+        },
         margin: { left: MARGIN, right: MARGIN, bottom: 40 },
         didDrawPage: (d) => {
             if (d.pageNumber > 1 && drawTemplate) {
@@ -94,6 +187,6 @@ export const generateMPT = (doc, data, currentY, contentWidth, primaryFont, chec
         }
     });
 
-    return doc.lastAutoTable.finalY + 5;
+    return (doc.lastAutoTable ? doc.lastAutoTable.finalY : currentY) + 5;
 };
 

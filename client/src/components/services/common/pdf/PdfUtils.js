@@ -58,8 +58,8 @@ export const drawCheckbox = (doc, x, y, size = 3, checked = false) => {
     }
 };
 
-export const drawCheckboxGroup = (doc, label, options, values, startX, y, fontName = "times") => {
-    doc.setFontSize(11);
+export const drawCheckboxGroup = (doc, label, options, values, startX, y, fontName = "times", fontSize = 9) => {
+    doc.setFontSize(fontSize);
     doc.setFont(fontName, "bold");
     doc.text(label, startX, y);
     const labelWidth = doc.getTextWidth(label);
@@ -67,10 +67,10 @@ export const drawCheckboxGroup = (doc, label, options, values, startX, y, fontNa
     doc.setFont(fontName, "normal");
 
     options.forEach(opt => {
-        const isChecked = values && Array.isArray(values) && values.includes(opt);
+        const isChecked = values && (Array.isArray(values) ? values.includes(opt) : values === opt);
         drawCheckbox(doc, currentX, y, 3, isChecked);
-        doc.text(opt, currentX + 5, y);
-        currentX += opt.length > 6 ? 28 : 25;
+        doc.text(opt, currentX + 4, y);
+        currentX += opt.length > 5 ? 25 : 20;
     });
 };
 
