@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { LiftFormSection } from './LiftFormSection';
-import api from '@/lib/api';
+import api, { API_BASE_URL } from '@/lib/api';
 import { toast } from 'sonner';
 import { Camera, Upload, Trash2, X, Image } from 'lucide-react';
 import { format } from 'date-fns';
@@ -61,7 +61,7 @@ export const PhotoUploadSection = ({
 
       const newPhotos = response.data.files.map(file => ({
         id: crypto.randomUUID(),
-        url: `http://localhost:5000${file.url}`,
+        url: `${API_BASE_URL}${file.url}`,
         title: file.name.replace(/\.[^/.]+$/, ''),
         description: '',
         section: 'General',

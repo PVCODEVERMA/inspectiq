@@ -25,6 +25,7 @@ import {
 import logo from '@/assets/qcws-logo.png';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
+import api, { API_BASE_URL } from '@/lib/api';
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ const AuthPage = () => {
   useEffect(() => {
     const checkMasterAdmin = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/check-master-admin`);
+        const response = await fetch(`${API_BASE_URL}/api/auth/check-master-admin`);
         const data = await response.json();
         setMasterAdminExists(data.exists);
       } catch (error) {

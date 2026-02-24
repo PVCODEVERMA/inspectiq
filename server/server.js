@@ -31,6 +31,7 @@ if (process.env.NODE_ENV !== "production") {
 // Allowed origins
 const allowedOrigins = [
   "https://inspectiq-y9l9-834ufv5du-qcwsapp-2732s-projects.vercel.app",
+  "https://inspectiq.vercel.app",
   "http://localhost:8080",
   "http://localhost:8081",
   "http://localhost:5173"

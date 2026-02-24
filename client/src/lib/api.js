@@ -4,6 +4,8 @@ import axios from "axios";
 const BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+export const API_BASE_URL = BASE_URL;
+
 // Axios instance
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,
@@ -46,4 +48,4 @@ api.interceptors.response.use(
 );
 
 export default api;
-export const API_BASE_URL = BASE_URL;
+export { BASE_URL as API_BASE_URL };
