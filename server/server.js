@@ -17,7 +17,12 @@ const PORT = process.env.PORT || 5000;
 ========================= */
 
 // Security headers
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // Logging (only in development)
 if (process.env.NODE_ENV !== "production") {
@@ -105,7 +110,10 @@ app.use("/api/consultancy/welding-audit", weldingAuditRoutes);
 /* =========================
    📁 Static Files
 ========================= */
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", (req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  next();
+}, express.static(path.join(__dirname, "uploads")));
 
 /* =========================
    ❤️ Health Check

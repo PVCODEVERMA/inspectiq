@@ -210,6 +210,22 @@ export const useIndustrialForm = () => {
         }
     };
 
+    const handlePhotoRename = (fieldId, index, newName) => {
+        setFormData(prev => {
+            const existing = Array.isArray(prev[fieldId]) ? prev[fieldId] : [];
+            const updated = [...existing];
+            if (updated[index]) {
+                const img = updated[index];
+                const url = typeof img === 'object' ? img.url : img;
+                updated[index] = { url, name: newName };
+            }
+            return { ...prev, [fieldId]: updated };
+        });
+        // Also update viewer data if open so it reflects immediately
+        setViewerData(prev => prev ? { ...prev, name: newName } : null);
+        toast.success("Photo renamed");
+    };
+
     const handleTableAdd = (stepId, columns) => {
         const emptyRow = Object.fromEntries(columns.map(c => {
             if (c.type === 'select' && c.options?.length > 0) {
@@ -351,6 +367,7 @@ export const useIndustrialForm = () => {
         handleGridInput,
         handleClientChange,
         handlePhotoUpload,
+        handlePhotoRename,
         handleTableAdd,
         handleTableChange,
         handleTableRemove,

@@ -43,14 +43,8 @@ export const Header = ({ title, shortTitle, subtitle }) => {
           onClick={toggleMobileSidebar}
           className="lg:hidden text-white hover:text-foreground hover:bg-muted/50 transition-colors p-4"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-6 h-6 text-white" />
         </Button>
-        <div className="min-w-0 flex-1">
-          <h1 className="text-base sm:text-2xl font-display font-bold text-foreground truncate text-white">
-            <span className="sm:hidden">{shortTitle || title}</span>
-            <span className="hidden sm:inline">{title}</span>
-          </h1>
-        </div>
       </div>
 
       <div className="flex items-center gap-4 rounded-full">
@@ -131,7 +125,7 @@ export const Header = ({ title, shortTitle, subtitle }) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>
+    </header >
   );
 };
 

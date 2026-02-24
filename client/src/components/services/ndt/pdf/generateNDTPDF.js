@@ -3,66 +3,13 @@ import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import qcwsLogo from '@/assets/qcws-logo.png';
 import homePageLogo from '@/assets/home_page_logo.png';
+import { getBase64Image, addGoogleFonts } from '@/components/services/common/pdf/PdfUtils';
 
 export const generateNDTPDF = async (data, template, mode = 'download') => {
     try {
         const doc = new jsPDF();
 
-        // Add Google Fonts
-        const addGoogleFonts = async () => {
-            const fonts = [
-                { name: "Carlito-Regular.ttf", fontName: "Carlito", style: "normal", url: 'https://github.com/google/fonts/raw/main/ofl/carlito/Carlito-Regular.ttf' },
-                { name: "Carlito-Bold.ttf", fontName: "Carlito", style: "bold", url: 'https://github.com/google/fonts/raw/main/ofl/carlito/Carlito-Bold.ttf' }
-            ];
-
-            try {
-                const results = await Promise.all(fonts.map(async (font) => {
-                    try {
-                        const response = await fetch(font.url);
-                        if (!response.ok) return false;
-                        const blob = await response.blob();
-                        const reader = new FileReader();
-                        return await new Promise((resolve) => {
-                            reader.onloadend = () => {
-                                const base64data = reader.result.split(',')[1];
-                                doc.addFileToVFS(font.name, base64data);
-                                doc.addFont(font.name, font.fontName, font.style);
-                                resolve(true);
-                            };
-                            reader.onerror = () => resolve(false);
-                            reader.readAsDataURL(blob);
-                        });
-                    } catch (err) {
-                        console.warn(`Could not load font ${font.fontName}:`, err);
-                        return false;
-                    }
-                }));
-                return results.every(res => res === true);
-            } catch (e) {
-                console.warn("Error loading Google Fonts, falling back to standard fonts", e);
-                return false;
-            }
-        };
-
-        // Helper to convert URL/Path to Base64 for PDF
-        const getBase64Image = async (url) => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.crossOrigin = 'Anonymous';
-                img.src = url;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL('image/jpeg'));
-                };
-                img.onerror = () => resolve(null);
-            });
-        };
-
-        const fontsLoaded = await addGoogleFonts();
+        const fontsLoaded = await addGoogleFonts(doc);
         const primaryFont = fontsLoaded ? "Carlito" : "helvetica";
         const titleFont = fontsLoaded ? "Carlito" : "helvetica";
 

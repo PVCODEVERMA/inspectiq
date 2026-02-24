@@ -7,7 +7,8 @@ import {
     drawInfoRow,
     MARGIN,
     FONTS,
-    drawSignatureFooterOnLastPage
+    drawSignatureFooterOnLastPage,
+    getBase64Image
 } from './PdfUtils';
 
 // Import Service Generators
@@ -168,25 +169,6 @@ export const generateIndustrialPDF = async (data, template, mode = 'download') =
 
         const drawnPages = new Set();
         const drawTemplate = (pageNo) => drawStandardTemplate(doc, pageNo, doc.internal.getNumberOfPages(), template, fontsLoaded, drawnPages, data);
-
-        // Helper to convert URL/Path to Base64 for PDF
-        const getBase64Image = async (url) => {
-            if (!url) return null;
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.crossOrigin = 'Anonymous';
-                img.src = url;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL('image/jpeg'));
-                };
-                img.onerror = () => resolve(null);
-            });
-        };
 
         // Footer occupies pageHeight-35 to pageHeight; reserve space so content never overlaps
         const FOOTER_TOP = 60; // min gap from bottom (content must end above pageHeight - FOOTER_TOP)

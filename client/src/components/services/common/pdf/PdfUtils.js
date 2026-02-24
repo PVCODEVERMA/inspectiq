@@ -1,6 +1,7 @@
 import qcwsLogo from '@/assets/qcws-logo.png';
 import homePageLogo from '@/assets/home_page_logo.png';
 import { format } from 'date-fns';
+import { getFileUrl } from '@/lib/utils';
 
 // --- Constants ---
 export const MARGIN = 15;
@@ -399,5 +400,31 @@ export const drawTable = (doc, headers, rows, y, contentWidth, fontName = 'helve
     });
 
     return y + 2;
+};
+
+// --- Image Processing ---
+export const getBase64Image = async (url) => {
+    if (!url) return null;
+
+    // Ensure the URL is correctly constructed using getFileUrl
+    const fullUrl = getFileUrl(url);
+
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.src = fullUrl;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/jpeg'));
+        };
+        img.onerror = (err) => {
+            console.warn(`Failed to load image at ${fullUrl}:`, err);
+            resolve(null);
+        };
+    });
 };
 

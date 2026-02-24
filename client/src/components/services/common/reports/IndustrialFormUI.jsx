@@ -39,7 +39,6 @@ import {
     CommandItem,
     CommandList,
 } from "@/components/ui/command";
-import CameraCapture from '@/components/ui/CameraCapture';
 import ImageViewer from '@/components/ui/ImageViewer';
 
 export const IndustrialFormUI = ({
@@ -60,6 +59,7 @@ export const IndustrialFormUI = ({
     handleGridInput,
     handleClientChange,
     handlePhotoUpload,
+    handlePhotoRename,
     handleTableAdd,
     handleTableChange,
     handleTableRemove,
@@ -175,19 +175,12 @@ export const IndustrialFormUI = ({
                                                                 })}
                                                             </div>
                                                         )}
-                                                        <div className="grid grid-cols-2 gap-3">
+                                                        <div className="grid grid-cols-1 gap-3">
                                                             <label className="relative flex flex-col items-center justify-center gap-2 h-24 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-primary/40 transition-colors cursor-pointer group">
                                                                 <Upload className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
-                                                                <span className="text-xs font-semibold text-slate-500 group-hover:text-primary transition-colors text-center px-2">Gallery</span>
+                                                                <span className="text-xs font-semibold text-slate-500 group-hover:text-primary transition-colors text-center px-2">Add Photos / Open Gallery</span>
                                                                 <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handlePhotoUpload(e, field.id)} accept="image/*,video/*" multiple />
                                                             </label>
-                                                            <button type="button" onClick={() => { setCameraFieldId(field.id); setCameraOpen(true); }} className="relative flex flex-col items-center justify-center gap-2 h-24 w-full rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-primary/40 transition-colors cursor-pointer group">
-                                                                <Camera className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
-                                                                <span className="text-xs font-semibold text-slate-500 group-hover:text-primary transition-colors text-center px-2">Camera</span>
-                                                                <div className="absolute top-2 right-3 px-2 py-0.5 bg-primary/10 rounded-full">
-                                                                    <span className="text-[10px] font-bold text-primary">{picLabel}</span>
-                                                                </div>
-                                                            </button>
                                                         </div>
                                                     </div>
                                                 );
@@ -296,23 +289,13 @@ export const IndustrialFormUI = ({
                 </div>
             </div>
 
-            {cameraOpen && (
-                <CameraCapture
-                    onCapture={(file) => {
-                        handlePhotoUpload({ target: { files: [file] } }, cameraFieldId);
-                        setCameraOpen(false);
-                    }}
-                    onClose={() => setCameraOpen(false)}
-                    title={`Capture Photo for ${activeTemplate?.title}`}
-                />
-            )}
 
             {viewerOpen && viewerData && (
                 <ImageViewer
-                    isOpen={viewerOpen}
+                    open={viewerOpen}
                     onClose={() => setViewerOpen(false)}
-                    imageUrl={viewerData.url}
-                    imageName={viewerData.name}
+                    image={{ url: viewerData.url, name: viewerData.name }}
+                    onUpdate={(newName) => handlePhotoRename(viewerData.fieldId, viewerData.index, newName)}
                     onDelete={() => {
                         const existing = Array.isArray(formData[viewerData.fieldId]) ? formData[viewerData.fieldId] : [];
                         const updated = existing.filter((_, i) => i !== viewerData.index);
