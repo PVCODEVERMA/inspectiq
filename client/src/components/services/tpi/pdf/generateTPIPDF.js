@@ -2,7 +2,8 @@ import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import {
     addGoogleFonts, FONTS, MARGIN,
-    drawStandardTemplate, drawInfoRow
+    drawStandardTemplate, drawInfoRow,
+    checkPageBreak, getBase64Image
 } from '../../common/pdf/PdfUtils';
 import {
     generatePIM,
@@ -79,7 +80,7 @@ export const generateTPIPDF = async (data, template, mode = 'download') => {
     const generator = TPI_GENERATORS[formType];
 
     if (generator) {
-        currentY = generator(doc, data, currentY, contentWidth, primaryFont);
+        currentY = await generator(doc, data, currentY, contentWidth, primaryFont, checkPageBreak, drawTemplate, getBase64Image);
     } else {
         // Generic fallback text
         doc.setFontSize(10);

@@ -1069,36 +1069,120 @@ export const reportTemplates = {
                 title: 'General Information',
                 icon: ClipboardCheck,
                 fields: [
-                    { id: 'client_name', label: 'Client', type: 'text' },
-                    { id: 'report_no', label: 'Report No', type: 'text' },
-                    { id: 'date', label: 'Date', type: 'date' },
-                    { id: 'vendor_name', label: 'Vendor / Manufacturer', type: 'text' },
-                    { id: 'location', label: 'Inspection Location', type: 'text' },
-                    { id: 'po_number', label: 'PO Number', type: 'text' },
-                    { id: 'scope', label: 'Scope of Inspection', type: 'textarea' },
-                    { id: 'drawing_ref', label: 'Drawing / Spec Reference', type: 'text' }
+                    { id: 'client_name', label: 'CLIENT:', type: 'text' },
+                    { id: 'report_no', label: 'REPORT#:', type: 'text' },
+                    { id: 'date', label: 'DATE:', type: 'date' },
+                    { id: 'vendor_name', label: 'VENDOR:', type: 'text' },
+                    { id: 'location', label: 'INSPECTION LOCATION:', type: 'text' },
+                    { id: 'project_name', label: 'PROJECT:', type: 'text', placeholder: 'Enter Project Name' },
+                    { id: 'po_number', label: 'PO#:', type: 'text' },
+                    { id: 'rfi_number', label: 'RFI / NOTIFICATION #:', type: 'text' },
+                    { id: 'itp_qap_number', label: 'ITP/QAP#:', type: 'text' },
+                    { id: 'inspection_date', label: 'DATE OF INSPECTION#:', type: 'date' },
                 ]
             },
             {
-                id: 'findings',
-                title: 'Inspection Findings',
+                id: 'scope_section',
+                title: 'SCOPE OF INSECTION',
+                icon: ClipboardCheck,
+                fields: [
+                    {
+                        id: 'scope_selection',
+                        label: 'SELECT SCOPE:',
+                        type: 'checkbox_group',
+                        options: ['PIM', 'IN PROCESS', 'FINAL', 'MECHANICAL', 'ELECTRICAL', 'INSTRUMENTATION', 'Visual', 'Dimensions', 'Painting', 'Document review', 'DT Witness', 'NDT Witness', 'TPM', 'FAT']
+                    }
+                ]
+            },
+            {
+                id: 'summary',
+                title: 'INSPECTION SUMMARY',
+                icon: ClipboardCheck,
+                fields: [
+                    { id: 'ncr_issued', label: 'Non-Conformity Report Issued During This Visit:', type: 'select', options: ['No', 'Yes'] },
+                    { id: 'order_completed', label: 'Order Completed:', type: 'select', options: ['No', 'Yes'] },
+                    { id: 'overall_result', label: 'Result:', type: 'select', options: ['Satisfactory', 'Not Satisfactory', 'Conditional'] }
+                ]
+            },
+            {
+                id: 'offered_items',
+                title: 'Offered Items',
                 icon: ClipboardCheck,
                 type: 'dynamic_table',
                 columns: [
-                    { key: 'item_no', label: 'Item No', type: 'text' },
-                    { key: 'description', label: 'Finding Description', type: 'text' },
-                    { key: 'reference', label: 'Code / Std Reference', type: 'text' },
-                    { key: 'result', label: 'Result', type: 'select', options: ['Accept', 'Reject', 'Observation'] },
-                    { key: 'remarks', label: 'Remarks', type: 'text' }
+                    { key: 'sr_no', label: 'SR. NO.', type: 'text' },
+                    { key: 'description', label: 'ITEM DESCRIPTION', type: 'text' },
+                    { key: 'inspected_qty', label: 'INSPECTED QTY.', type: 'text' },
+                    { key: 'accepted_qty', label: 'ACCEPTED QTY.', type: 'text' }
                 ]
             },
             {
-                id: 'conclusion',
-                title: 'Conclusion',
+                id: 'inspection_details',
+                title: 'Inspection Details',
                 icon: ClipboardCheck,
                 fields: [
-                    { id: 'overall_result', label: 'Overall Result', type: 'select', options: ['Accepted', 'Rejected', 'Conditional Accept'] },
-                    { id: 'remarks', label: 'Inspector Remarks', type: 'textarea' }
+                    {
+                        id: 'detailed_observation',
+                        label: 'Findings and Observations',
+                        type: 'textarea',
+                        placeholder: 'Inspection Carried out as per notification & referral docs...\n- Visual inspection carried out...',
+                        defaultValue: 'Inspection Carried out as per notification & referral docs, inspection result found as below details.\n- Visual inspection carried out of fire lines, verified layout as per drawing & found in order, no defect or damage observed.\n- Hydro test witnessed of above items at test pressure (450 Kg/Cm2), no leakage or pressure drop observed during holding time, test result found satisfactory.'
+                    }
+                ]
+            },
+            {
+                id: 'attendees',
+                title: 'Attendees',
+                icon: ClipboardCheck,
+                type: 'dynamic_table',
+                columns: [
+                    { key: 'name', label: 'NAME', type: 'text' },
+                    { key: 'position', label: 'POSITION', type: 'text' },
+                    { key: 'company', label: 'COMPANY NAME', type: 'text' },
+                    { key: 'contact', label: 'CONTACT NO', type: 'text' }
+                ]
+            },
+            {
+                id: 'referred_docs',
+                title: 'Referred Documents',
+                icon: ClipboardCheck,
+                type: 'dynamic_table',
+                columns: [
+                    { key: 'sr_no', label: 'SR NO.', type: 'text' },
+                    { key: 'title', label: 'DOCUMENT TITLE', type: 'text' },
+                    { key: 'doc_no', label: 'DOCUMENT NO', type: 'text' },
+                    { key: 'rev_edd', label: 'REV/ EDD', type: 'text' }
+                ]
+            },
+            {
+                id: 'test_instruments',
+                title: 'Test Instruments Used',
+                icon: ClipboardCheck,
+                type: 'dynamic_table',
+                columns: [
+                    { key: 'sr_no', label: 'SR NO', type: 'text' },
+                    { key: 'name', label: 'INSTRUMENTS NAME', type: 'text' },
+                    { key: 'id_number', label: 'INSTRUMENT ID', type: 'text' },
+                    { key: 'calibration_due', label: 'CALIBRATION DUE DATE', type: 'text' }
+                ]
+            },
+            {
+                id: 'docs_attached',
+                title: 'Document Attached',
+                icon: ClipboardCheck,
+                type: 'dynamic_table',
+                columns: [
+                    { key: 'sr_no', label: 'SR NO', type: 'text' },
+                    { key: 'title', label: 'DOCUMENTS TITLE', type: 'text' }
+                ]
+            },
+            {
+                id: 'signatures',
+                title: 'Signatures',
+                icon: ClipboardCheck,
+                fields: [
+                    { id: 'inspector_date', label: 'Inspector Date', type: 'date' },
+                    { id: 'client_date', label: 'Client Date', type: 'date' }
                 ]
             }
         ]

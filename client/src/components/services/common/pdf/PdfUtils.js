@@ -74,39 +74,43 @@ export const drawCheckboxGroup = (doc, label, options, values, startX, y, fontNa
     });
 };
 
-export const drawInfoRow = (doc, label1, value1, label2, value2, y, contentWidth, fontName = "times", fontSize = 10) => {
+export const drawInfoRow = (doc, label1, value1, label2, value2, y, contentWidth, fontName = "times", fontSize = 8, fixedLabelWidth = null, indent = 0) => {
     const rowH = 7;
-    doc.rect(MARGIN, y, contentWidth, rowH);
-    const mid = MARGIN + (contentWidth / 2);
+    const startX = MARGIN + indent;
+    const effectiveWidth = contentWidth - indent;
+
+    doc.setLineWidth(0.1);
+    doc.rect(startX, y, effectiveWidth, rowH);
+
+    const mid = startX + (effectiveWidth / 2);
     const textY = y + 5;
 
     doc.setFontSize(fontSize);
     doc.setFont(fontName, "bold");
-    doc.text(label1, MARGIN + BOX_PAD, textY);
+    doc.text(label1, startX + BOX_PAD, textY);
 
-    const label1Width = doc.getTextWidth(label1);
+    const label1Width = fixedLabelWidth || doc.getTextWidth(label1);
     doc.setFont(fontName, "normal");
 
-    // Add truncation to prevent overlap with second column
     let val1 = String(value1 || '');
     if (label2) {
-        const maxWidth = (contentWidth / 2) - label1Width - (BOX_PAD * 3);
+        const maxWidth = (effectiveWidth / 2) - label1Width - (BOX_PAD * 3);
         if (doc.getTextWidth(val1) > maxWidth) {
             val1 = doc.splitTextToSize(val1, maxWidth)[0];
             if (val1.length < String(value1).length) val1 += '...';
         }
     }
-    doc.text(val1, MARGIN + BOX_PAD + label1Width + BOX_PAD, textY);
+    doc.text(val1, startX + BOX_PAD + label1Width + BOX_PAD, textY);
 
     if (label2) {
         doc.setFont(fontName, "bold");
         doc.text(label2, mid + BOX_PAD, textY);
 
-        const label2Width = doc.getTextWidth(label2);
+        const label2Width = fixedLabelWidth || doc.getTextWidth(label2);
         doc.setFont(fontName, "normal");
 
         let val2 = String(value2 || '');
-        const maxWidth = (contentWidth / 2) - label2Width - (BOX_PAD * 3);
+        const maxWidth = (effectiveWidth / 2) - label2Width - (BOX_PAD * 3);
         if (doc.getTextWidth(val2) > maxWidth) {
             val2 = doc.splitTextToSize(val2, maxWidth)[0];
             if (val2.length < String(value2).length) val2 += '...';
@@ -117,11 +121,11 @@ export const drawInfoRow = (doc, label1, value1, label2, value2, y, contentWidth
     return y + rowH;
 };
 
-export const checkPageBreak = (doc, currentY, pageHeight, requiredSpace, drawTemplateFn) => {
-    if (currentY + requiredSpace > pageHeight - 60) {
+export const checkPageBreak = (doc, currentY, pageHeight, requiredSpace, drawTemplateFn, startY = 40) => {
+    if (currentY + requiredSpace > pageHeight - 35) { // Safety margin of 35mm from bottom (footer starts at -30)
         doc.addPage();
-        drawTemplateFn(doc.internal.getNumberOfPages());
-        return 40; // Reset Y position
+        if (drawTemplateFn) drawTemplateFn(doc.internal.getNumberOfPages());
+        return startY;
     }
     return currentY;
 };
@@ -209,50 +213,62 @@ export const drawStandardTemplate = (doc, pageNumber, totalPages, template, font
     doc.text("REV.01", refCenterX, 42.5, { align: 'center' });
 
     // no footer or signature drawing here; page numbers and report title handled below
-    // but we still need dimensions for the separator and page number box
-    const footerRow1 = BOX_PAD + 4;
-    const footerRow2 = footerRow1 + ROW_GAP;
-    const footerRow3 = footerRow2 + ROW_GAP;
-    const footerBoxH = footerRow3 + ROW_GAP;
-    const finalY = pageHeight - 35;
-
-    const boxSize = 8;
-    const boxX = pageWidth - MARGIN - boxSize;
-    const footerBoxBottom = finalY + footerBoxH;
-    const separatorY = footerBoxBottom + BOX_PAD;
-    const titleY = separatorY + ROW_GAP;
-
-    // Separator line below signature box (so it doesn't cut through label descenders)
+    // --- NEW FOOTER DESIGN ---
+    const separatorY = pageHeight - 15;
     doc.setDrawColor(0);
     doc.setLineWidth(0.1);
     doc.line(MARGIN, separatorY, pageWidth - MARGIN, separatorY);
 
-    // Red Box for Page Number (same row as title)
-    const boxY = titleY - 5.5;
+    const footerTextY = separatorY + 4;
+    doc.setFontSize(8);
+    doc.setFont(primaryFont, "normal");
+    doc.setTextColor(0, 0, 0);
+
+    // Line 1: Address
+    const address = "P2, 235, OAK TOWER, PARAMOUNT GOLFMART, ZETA - II, GAUTAM BUDDHA NAGAR, UP-201306";
+    doc.text(address, pageWidth / 2, footerTextY, { align: 'center' });
+
+    // Line 2: Web & Email
+    const webEmailY = footerTextY + 4;
+    const webText = "Web: ";
+    const webUrl = "www.qualityconcept.in";
+    const emailText = ", Email: ";
+    const emailUrl = "info@qualityconcept.in";
+
+    const totalWebEmailWidth = doc.getTextWidth(webText + webUrl + emailText + emailUrl);
+    let currentX = (pageWidth - totalWebEmailWidth) / 2;
+
+    doc.setTextColor(0, 0, 0);
+    doc.text(webText, currentX, webEmailY);
+    currentX += doc.getTextWidth(webText);
+
+    doc.setTextColor(30, 58, 138); // Blue color for links
+    doc.text(webUrl, currentX, webEmailY);
+    currentX += doc.getTextWidth(webUrl);
+
+    doc.setTextColor(0, 0, 0);
+    doc.text(emailText, currentX, webEmailY);
+    currentX += doc.getTextWidth(emailText);
+
+    doc.setTextColor(30, 58, 138); // Blue color for links
+    doc.text(emailUrl, currentX, webEmailY);
+
+    // Line 3: Contact
+    const contactY = webEmailY + 4;
+    doc.setTextColor(0, 0, 0);
+    doc.text("Contact: +91 8377885000/ 8377885001", pageWidth / 2, contactY, { align: 'center' });
+
+    // Page Number Box
+    const boxSize = 8;
+    const boxX = pageWidth - MARGIN - boxSize;
+    const boxY = separatorY + 1;
     doc.setFillColor(139, 0, 0); // Dark Red
     doc.rect(boxX, boxY, boxSize, boxSize, 'F');
 
-    // Page Number text (White)
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(10);
     doc.setFont(primaryFont, "bold");
     doc.text(String(pageNumber), boxX + (boxSize / 2), boxY + 5.5, { align: 'center' });
-
-    // Footer Report Title (Black, Left Aligned) — keep clear of red box
-    doc.setTextColor(0, 0, 0);
-    doc.setFont(primaryFont, "normal");
-    doc.setFontSize(10);
-    const footerTitle = (template.title || "REPORT").toUpperCase();
-    const footerId = data.report_no || data.reportNo || '';
-    const footerDisplayFull = footerId ? `${footerTitle} / ${footerId}` : footerTitle;
-
-    const maxFooterWidth = boxX - MARGIN - 10;
-    let footerDisplay = footerDisplayFull;
-    while (doc.getTextWidth(footerDisplay) > maxFooterWidth && footerDisplay.length > 3) {
-        footerDisplay = `${footerDisplay.slice(0, -4)}...`;
-    }
-
-    doc.text(footerDisplay, MARGIN + BOX_PAD, titleY);
 };
 
 // helper that should be called once after full document generated
@@ -324,55 +340,48 @@ export const drawReportHeader = (doc, data, currentY, contentWidth, primaryFont)
 };
 
 // --- TPI Table ---
-export const drawTable = (doc, headers, rows, y, contentWidth, fontName = 'helvetica', checkPageBreak, drawTemplate) => {
+export const drawTable = (doc, headers, rows, y, tableWidth, fontName = 'helvetica', checkPageBreak, drawTemplate, xOffset = 0) => {
     const colCount = headers.length;
-    const colWidth = contentWidth / colCount;
+    const effectiveWidth = tableWidth || (doc.internal.pageSize.width - MARGIN * 2);
+    const colWidth = effectiveWidth / colCount;
     const rowHeight = BOX_PAD + ROW_GAP + 2;
-    const startX = MARGIN;
+    const startX = MARGIN + xOffset;
     const cellPad = BOX_PAD;
     const textYOffset = BOX_PAD + 4;
 
     // Header row
-    if (checkPageBreak) y = checkPageBreak(rowHeight);
+    if (checkPageBreak) y = checkPageBreak(y, rowHeight);
     doc.setFillColor(219, 234, 254); // light blue
-    doc.rect(startX, y, contentWidth, rowHeight, 'F');
+    doc.rect(startX, y, effectiveWidth, rowHeight, 'F');
     doc.setDrawColor(180, 180, 180);
     doc.setLineWidth(0.1);
-    doc.rect(startX, y, contentWidth, rowHeight);
+    doc.rect(startX, y, effectiveWidth, rowHeight);
 
     doc.setFontSize(8);
     doc.setFont(fontName, 'bold');
     doc.setTextColor(0, 0, 0);
 
-    headers.forEach((header, i) => {
-        const cellX = startX + i * colWidth;
-        if (i > 0) doc.line(cellX, y, cellX, y + rowHeight);
-        const text = doc.splitTextToSize(String(header), colWidth - cellPad * 2);
-        doc.text(text, cellX + cellPad, y + textYOffset);
+    headers.forEach((h, i) => {
+        const cx = startX + i * colWidth;
+        if (i > 0) doc.line(cx, y, cx, y + rowHeight);
+        doc.text(doc.splitTextToSize(String(h), colWidth - cellPad * 2), cx + cellPad, y + textYOffset);
     });
 
     y += rowHeight;
+    doc.setFont(fontName, 'normal');
 
     // Data rows
-    doc.setFont(fontName, 'normal');
-    const dataRows = rows && rows.length > 0 ? rows : [headers.map(() => '')];
-
-    dataRows.forEach((row) => {
-        let maxLines = 1;
-        row.forEach((cell, i) => {
-            const lines = doc.splitTextToSize(String(cell || ''), colWidth - cellPad * 2);
-            if (lines.length > maxLines) maxLines = lines.length;
-        });
-        const cellHeight = Math.max(rowHeight, maxLines * 4 + BOX_PAD * 2);
-
+    rows.forEach((row) => {
+        const cellHeight = rowHeight;
         if (checkPageBreak) {
-            const newY = checkPageBreak(cellHeight);
+            const newY = checkPageBreak(y, cellHeight);
             if (newY < y) {
                 y = newY;
+                // Redraw table header on new page
                 doc.setFillColor(219, 234, 254);
-                doc.rect(startX, y, contentWidth, rowHeight, 'F');
+                doc.rect(startX, y, effectiveWidth, rowHeight, 'F');
                 doc.setDrawColor(180, 180, 180);
-                doc.rect(startX, y, contentWidth, rowHeight);
+                doc.rect(startX, y, effectiveWidth, rowHeight);
                 headers.forEach((h, i) => {
                     const cx = startX + i * colWidth;
                     if (i > 0) doc.line(cx, y, cx, y + rowHeight);
@@ -381,13 +390,11 @@ export const drawTable = (doc, headers, rows, y, contentWidth, fontName = 'helve
                 });
                 y += rowHeight;
                 doc.setFont(fontName, 'normal');
-            } else {
-                y = newY;
             }
         }
 
         doc.setDrawColor(180, 180, 180);
-        doc.rect(startX, y, contentWidth, cellHeight);
+        doc.rect(startX, y, effectiveWidth, cellHeight);
 
         row.forEach((cell, i) => {
             const cellX = startX + i * colWidth;

@@ -3,54 +3,38 @@ const mongoose = require('mongoose');
 const engineeringInspectionSchema = new mongoose.Schema({
     // General Info
     report_no: { type: String, required: true, sparse: true },
-    project_name: { type: String, required: true },
+    project_name: { type: String, required: false },
     client_name: { type: String, required: true },
     vendor_name: String,
     date: { type: Date, default: Date.now },
     site_location: String,
 
-    // Reference Details
+    // Reference Details (Box 2)
     inspection_date: Date,
     po_number: String,
     rfi_number: String,
-    itp_number: String,
+    itp_qap_number: String,
 
-    // Scope of Inspection (Checkboxes)
-    scope_selection: {
-        pim: Boolean,
-        inprocess: Boolean,
-        final: Boolean,
-        mechanical: Boolean,
-        electrical: Boolean,
-        instrumentation: Boolean,
-        visual: Boolean,
-        dimensions: Boolean,
-        painting: Boolean,
-        documentreview: Boolean,
-        dtwitness: Boolean,
-        ndtwitness: Boolean,
-        tpm: Boolean,
-        fat: Boolean
-    },
+    // Scope of Inspection (Box 3) - Array for checkbox_group
+    scope_selection: [String],
 
-    // Inspection Summary
-    summary_result: {
-        ncr_issued: { type: String, enum: ['Yes', 'No'], default: 'No' },
-        order_completed: { type: String, enum: ['Yes', 'No'], default: 'No' },
-        overall_result: { type: String, enum: ['Satisfactory', 'Not Satisfactory', 'Conditional'], default: 'Satisfactory' }
-    },
+    // Inspection Summary (Box 4)
+    ncr_issued: { type: String, enum: ['Yes', 'No'], default: 'No' },
+    order_completed: { type: String, enum: ['Yes', 'No'], default: 'No' },
+    overall_result: { type: String, enum: ['Satisfactory', 'Not Satisfactory', 'Conditional'], default: 'Satisfactory' },
 
-    // Offered Items Table
+    // Offered Items Table (Box 5)
     offered_items: [{
+        sr_no: String,
         description: String,
         inspected_qty: String,
         accepted_qty: String
     }],
 
-    // Inspection Details / Observations
+    // Inspection Details / Observations (Box 6)
     detailed_observation: String,
 
-    // Attendees Table
+    // Attendees Table (Box 7 & Page 2 Box 1)
     attendees: [{
         name: String,
         position: String,
@@ -58,35 +42,35 @@ const engineeringInspectionSchema = new mongoose.Schema({
         contact: String
     }],
 
-    // Referred Documents
+    // Referred Documents (Page 2 Box 2)
     referred_documents: [{
+        sr_no: String,
         title: String,
         doc_no: String,
         rev_edd: String
     }],
 
-    // Test Instruments
+    // Test Instruments (Page 2 Box 3)
     test_instruments: [{
+        sr_no: String,
         name: String,
         id_number: String,
         calibration_due: String
     }],
 
-    // Client Documents
-    client_documents: [{
-        title: String,
-        reference: String,
-        date: String
+    // Document Attached (Page 2 Box 4)
+    documents_attached: [{
+        sr_no: String,
+        title: String
     }],
 
-    // Signatures
-    inspector_signature_url: String, // URL from Cloudinary
-    reviewed_by_client: {
-        signature_url: String,
-        date: Date
-    },
+    // Signatures (Page 2 Box 5)
+    inspector_signature_url: String,
+    inspector_date: Date,
+    client_signature_url: String,
+    client_date: Date,
 
-    // Photos
+    // Photos (Page 3)
     annotated_photos: [{
         url: String,
         caption: String
@@ -96,7 +80,7 @@ const engineeringInspectionSchema = new mongoose.Schema({
     status: { type: String, enum: ['draft', 'submitted'], default: 'draft' },
     created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     formType: { type: String, default: 'engineering-inspection' }
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 // Auto-generate Report Number
 engineeringInspectionSchema.pre('validate', async function () {
@@ -108,7 +92,7 @@ engineeringInspectionSchema.pre('validate', async function () {
             // Use the main 'counters' collection for report sequence
             const db = mongoose.connection.db;
             const countersCollection = db.collection('counters');
-            
+
             const counter = await countersCollection.findOneAndUpdate(
                 { _id: `ei_${year}` },
                 { $inc: { seq: 1 } },

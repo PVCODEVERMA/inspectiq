@@ -167,13 +167,14 @@ export const IndustrialFormUI = ({
                                             }
 
                                             if (field.type === 'checkbox_group') {
+                                                const currentValues = Array.isArray(formData[field.id]) ? formData[field.id] : [];
                                                 return (
                                                     <div key={field.id} className="space-y-3">
                                                         <Label className="font-bold">{field.label}</Label>
                                                         <div className="flex flex-wrap gap-3">
                                                             {field.options.map(opt => (
-                                                                <div key={opt} className="flex items-center space-x-2 border px-3 py-2 rounded-lg bg-slate-50 hover:bg-white transition-colors cursor-pointer" onClick={() => handleCheckboxGroup(field.id, opt, !formData[field.id]?.includes(opt))}>
-                                                                    <Checkbox checked={formData[field.id]?.includes(opt)} onCheckedChange={(checked) => handleCheckboxGroup(field.id, opt, checked)} />
+                                                                <div key={opt} className="flex items-center space-x-2 border px-3 py-2 rounded-lg bg-slate-50 hover:bg-white transition-colors cursor-pointer" onClick={() => handleCheckboxGroup(field.id, opt, !currentValues.includes(opt))}>
+                                                                    <Checkbox checked={currentValues.includes(opt)} onCheckedChange={(checked) => handleCheckboxGroup(field.id, opt, checked)} />
                                                                     <span className="text-sm font-medium cursor-pointer">{opt}</span>
                                                                 </div>
                                                             ))}

@@ -261,11 +261,6 @@ export const useIndustrialForm = () => {
             return;
         }
 
-        if ((fType === 'engineering-inspection' || fType === 'Engineering Inspection Report') && !formData.project_name) {
-            toast.error("Project Name is required.");
-            return;
-        }
-
         if (isSavingRef.current) return;
         isSavingRef.current = true;
 

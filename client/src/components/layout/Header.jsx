@@ -45,6 +45,18 @@ export const Header = ({ title, shortTitle, subtitle }) => {
         >
           <Menu className="w-6 h-6 text-white" />
         </Button>
+
+        <div className="flex flex-col min-w-0">
+          <h1 className="text-lg font-bold text-white truncate leading-tight mt-1">
+            <span className="sm:hidden">{shortTitle || title || 'InspectIQ'}</span>
+            <span className="hidden sm:inline">{title || 'Dashboard'}</span>
+          </h1>
+          {subtitle && (
+            <p className="text-xs text-white/80 truncate hidden md:block">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-4 rounded-full">
