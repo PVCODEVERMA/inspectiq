@@ -23,7 +23,8 @@ import {
     Plus,
     X,
     Printer,
-    Camera
+    Camera,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -39,6 +40,7 @@ import {
     CommandItem,
     CommandList,
 } from "@/components/ui/command";
+import { toast } from 'react-hot-toast';
 import ImageViewer from '@/components/ui/ImageViewer';
 
 export const IndustrialFormUI = ({
@@ -66,6 +68,43 @@ export const IndustrialFormUI = ({
     handleSave,
     navigate
 }) => {
+    const confirmDeletePhoto = (fieldId, index) => {
+        toast((t) => (
+            <div className="flex flex-col gap-3 p-1">
+                <p className="text-sm font-medium text-slate-900 leading-tight">
+                    Are you sure you want to delete this photo?
+                </p>
+                <div className="flex justify-end gap-2">
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-3 text-xs font-semibold hover:bg-[#131212]"
+                        onClick={() => toast.dismiss(t.id)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-8 px-3 text-xs font-bold shadow-sm"
+                        onClick={() => {
+                            const existing = Array.isArray(formData[fieldId]) ? formData[fieldId] : [];
+                            const updated = existing.filter((_, i) => i !== index);
+                            handleInputChange({ target: { id: fieldId, value: updated } });
+                            toast.dismiss(t.id);
+                            setViewerOpen(false);
+                            toast.success("Photo deleted", { icon: '🗑️', duration: 2000 });
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </div>
+            </div>
+        ), {
+            duration: 6000,
+            position: 'top-center'
+        });
+    };
     return (
         <>
             <div className="min-h-screen bg-slate-50/50 pb-32">
@@ -166,7 +205,7 @@ export const IndustrialFormUI = ({
                                                                             <img src={url} alt={name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                                                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center">
                                                                                 <span className="text-[10px] text-white font-medium truncate w-full mb-2">{name}</span>
-                                                                                <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full shadow-lg" onClick={(e) => { e.stopPropagation(); const updated = existingImages.filter((_, i) => i !== idx); handleInputChange({ target: { id: field.id, value: updated } }); }}>
+                                                                                <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full shadow-lg" onClick={(e) => { e.stopPropagation(); confirmDeletePhoto(field.id, idx); }}>
                                                                                     <Trash2 className="w-4 h-4" />
                                                                                 </Button>
                                                                             </div>
@@ -179,7 +218,7 @@ export const IndustrialFormUI = ({
                                                             <label className="relative flex flex-col items-center justify-center gap-2 h-24 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-primary/40 transition-colors cursor-pointer group">
                                                                 <Upload className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
                                                                 <span className="text-xs font-semibold text-slate-500 group-hover:text-primary transition-colors text-center px-2">Add Photos / Open Gallery</span>
-                                                                <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handlePhotoUpload(e, field.id)} accept="image/*,video/*" multiple />
+                                                                <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handlePhotoUpload(e, field.id)} accept="image/*" multiple />
                                                             </label>
                                                         </div>
                                                     </div>
@@ -282,7 +321,14 @@ export const IndustrialFormUI = ({
                             <Button variant="outline" size="lg" className="h-14 px-8 rounded-2xl border-2 hover:bg-[#F44034] text-[#F44034] gap-2 font-bold order-2 sm:order-1" onClick={() => navigate(-1)}><ChevronLeft className="w-5 h-5" /> Back</Button>
                             <div className="flex gap-2 order-1 sm:order-2 flex-1">
                                 <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E]" onClick={() => handleSave(true, 'print')} disabled={isLoading}><Printer className="w-5 h-5" /></Button>
-                                <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] gap-2 font-bold" onClick={() => handleSave(true, 'download')} disabled={isLoading}><Download className="w-5 h-5" /> Generate PDF</Button>
+                                <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] gap-2 font-bold" onClick={() => handleSave(true, 'download')} disabled={isLoading}>
+                                    {isLoading ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <Download className="w-5 h-5" />
+                                    )}
+                                    {isLoading ? "Generating..." : "Generate PDF"}
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -296,12 +342,7 @@ export const IndustrialFormUI = ({
                     onClose={() => setViewerOpen(false)}
                     image={{ url: viewerData.url, name: viewerData.name }}
                     onUpdate={(newName) => handlePhotoRename(viewerData.fieldId, viewerData.index, newName)}
-                    onDelete={() => {
-                        const existing = Array.isArray(formData[viewerData.fieldId]) ? formData[viewerData.fieldId] : [];
-                        const updated = existing.filter((_, i) => i !== viewerData.index);
-                        handleInputChange({ target: { id: viewerData.fieldId, value: updated } });
-                        setViewerOpen(false);
-                    }}
+                    onDelete={() => confirmDeletePhoto(viewerData.fieldId, viewerData.index)}
                 />
             )}
         </>
