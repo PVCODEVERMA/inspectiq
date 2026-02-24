@@ -6,7 +6,8 @@ import {
     drawStandardTemplate,
     drawInfoRow,
     MARGIN,
-    FONTS
+    FONTS,
+    drawSignatureFooterOnLastPage
 } from './PdfUtils';
 
 // Import Service Generators
@@ -191,13 +192,10 @@ export const generateIndustrialPDF = async (data, template, mode = 'download') =
         const FOOTER_TOP = 60; // min gap from bottom (content must end above pageHeight - FOOTER_TOP)
         const PAGE_START_Y = 53;
 
-        const localCheckPageBreak = (yOrSpace, requiredSpace) => {
-            const y = typeof requiredSpace === 'number' ? yOrSpace : currentY;
-            const space = typeof requiredSpace === 'number' ? requiredSpace : yOrSpace;
+        const localCheckPageBreak = (y, space) => {
             if (y + space > pageHeight - FOOTER_TOP) {
                 doc.addPage();
                 drawTemplate(doc.internal.getNumberOfPages());
-                currentY = PAGE_START_Y;
                 return PAGE_START_Y;
             }
             return y;
@@ -235,6 +233,9 @@ export const generateIndustrialPDF = async (data, template, mode = 'download') =
             doc.setFont(primaryFont, "normal");
             doc.text(`Form Template: ${formType}`, MARGIN, currentY + 5);
         }
+
+        // draw signature footer only once now that document is finalized
+        drawSignatureFooterOnLastPage(doc, template, data);
 
         // --- SAVE ---
         if (mode === 'print') {

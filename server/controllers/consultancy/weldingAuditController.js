@@ -8,10 +8,8 @@ exports.createReport = async (req, res) => {
             created_by: req.user._id
         };
 
-        // Remove empty report_no to trigger auto-generation in pre-save hook
-        if (!reportData.report_no || reportData.report_no === '' || reportData.report_no === 'Auto' || reportData.report_no === 'Auto / Manual') {
-            delete reportData.report_no;
-        }
+        // ALWAYS remove report_no to trigger auto-generation
+        delete reportData.report_no;
 
         // Remove invalid ObjectId fields (empty string / 'undefined' / non-24-char hex)
         const isValidObjectId = (v) => /^[0-9a-fA-F]{24}$/.test(v);
@@ -51,9 +49,6 @@ exports.createReport = async (req, res) => {
                 : [`[${error.path}]: Invalid value '${error.value}' for type ${error.kind}`];
             console.error('Validation fields:', messages);
             return res.status(400).json({ message: `Validation Error: ${messages.join(', ')}` });
-        }
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Report Number already exists. Please use a unique Report No.' });
         }
         res.status(500).json({ message: error.message });
     }

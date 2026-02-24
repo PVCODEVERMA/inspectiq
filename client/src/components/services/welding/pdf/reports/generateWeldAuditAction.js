@@ -59,7 +59,8 @@ export const generateWeldAuditAction = async (doc, data, currentY, contentWidth,
 
     currentY += boxH + 8; // Reset Y with gap
 
-    const drawAuditSection = (title, fields, scoreKey, obsKey, y) => {
+    // define audit section helper early so it can be used immediately
+    function drawAuditSection(title, fields, scoreKey, obsKey, y) {
         const leftColWidth = 45;
         const rightColWidth = contentWidth - leftColWidth;
         const complianceWidth = 35;
@@ -145,16 +146,35 @@ export const generateWeldAuditAction = async (doc, data, currentY, contentWidth,
 
         doc.setTextColor(0, 0, 0);
         return startY + boxHeight + 5;
-    };
+    }
+
+    // 1. Welding Procedure Qualifications – placed immediately after general info so it stays on page 1
+    currentY = drawAuditSection("1. Welding Procedure Qualifications", [
+        { id: 'wpq_q1', label: 'WPSs were reviewed for compliance with essential and non-essential variables?' },
+        { id: 'wpq_q2', label: 'Welding parameters (current, voltage, travel speed, heat input) were clearly defined?' },
+        { id: 'wpq_q3', label: 'Base material grades, filler materials, preheat, interposes temperature, and PWHT requirements were specified in WPS?' }
+    ], 'wpq_score', 'wpq_observations', currentY);
+
 
     // Objective Section (2-Column Layout)
     const objLeftWidth = 45;
     const objRightWidth = contentWidth - objLeftWidth;
-    const objective = "The objective of this welding assessment audit is to verify the organization's compliance with applicable welding codes, standards, and specifications, and to assess the effectiveness of welding procedures, personnel qualifications, and quality control practices.";
-    const objLines = doc.splitTextToSize(objective, objRightWidth - 4);
-    const objBoxH = Math.max(22, (objLines.length * 5) + 8);
+    // now format objective text into three lines for compact appearance
+    const objective = "The objective of this welding assessment audit is to verify the organization's compliance with applicable welding codes, standards, and specifications and to assess the  effectiveness of\n" +
+                      "welding procedures, personnel qualifications, of welding procedures, personnel qualifications, \n" + 
+                      "and quality control practices";
 
-    currentY = checkPageBreak(currentY, objBoxH + 5);
+                    //   ".";
+    const objLines = doc.splitTextToSize(objective, objRightWidth - 4);
+
+    // calculate height based on number of wrapped lines; use a more generous line height
+    // to ensure the final line never escapes the box.  the formula mirrors the approach
+    // used for the "scope" section earlier.
+    const lineHeight = 4.5; // approximate height per line at fontSize 9
+    const objBoxH = Math.max(30, (objLines.length * lineHeight) + 12);
+
+    // leave a little extra space above/below the box for page-break logic
+    currentY = checkPageBreak(currentY, objBoxH + 8);
     doc.rect(MARGIN, currentY, contentWidth, objBoxH);
     doc.line(MARGIN + objLeftWidth, currentY, MARGIN + objLeftWidth, currentY + objBoxH);
 
@@ -165,7 +185,8 @@ export const generateWeldAuditAction = async (doc, data, currentY, contentWidth,
 
     doc.setFontSize(9);
     doc.setFont(primaryFont, "normal");
-    doc.text(objLines, MARGIN + objLeftWidth + 2, currentY + 7);
+    // start the text slightly lower to give some top padding
+    doc.text(objLines, MARGIN + objLeftWidth + 4, currentY + 12);
     currentY += objBoxH + 5;
 
     // Helper to draw the specific grid sections
@@ -215,7 +236,14 @@ export const generateWeldAuditAction = async (doc, data, currentY, contentWidth,
     // Scope Section
     const scopeLeftWidth = 45;
     const scopeRightWidth = contentWidth - scopeLeftWidth;
-    const scopeText = "This welding assessment audit was conducted to evaluate the compliance of welding activities with the applicable API requirements. The audit covered the following areas:\n1. Welding procedure qualification  2. Welder qualification and continuity\n3. Welding consumables control  4. Joint preparation and fit-up\n5. Welding execution and supervision  6. Inspection and testing\n7. Documentation and record control";
+    const scopeText = "This welding assessment audit was conducted to evaluate the compliance of welding activities with the applicable API requirements. The audit covered the following areas:\n" +
+                      "1. Welding procedure qualification\n" +
+                      "2. Welder qualification and continuity\n" +
+                      "3. Welding consumables control\n" +
+                      "4. Joint preparation and fit-up\n" +
+                      "5. Welding execution and supervision\n" +
+                      "6. Inspection and testing\n" +
+                      "7. Documentation and record control";
 
     const scopeLines = doc.splitTextToSize(scopeText, scopeRightWidth - 6);
     const scopeBoxH = Math.max(30, (scopeLines.length * 4.5) + 6);
@@ -234,26 +262,13 @@ export const generateWeldAuditAction = async (doc, data, currentY, contentWidth,
     doc.text(scopeLines, MARGIN + scopeLeftWidth + 3, currentY + 6);
     currentY += scopeBoxH + 5;
 
-    // Page 1 Audit Sections
-    currentY = drawAuditSection("1. Welding Procedure Qualifications", [
-        { id: 'wpq_q1', label: 'WPSs were reviewed for compliance with essential and non-essential variables?' },
-        { id: 'wpq_q2', label: 'Welding parameters (current, voltage, travel speed, heat input) were clearly defined?' },
-        { id: 'wpq_q3', label: 'Base material grades, filler materials, preheat, interposes temperature, and PWHT requirements were specified in WPS?' }
-    ], 'wpq_score', 'wpq_observations', currentY);
-
-    // New Pages for subsequent sections
-    const addSectionOnNewPage = (title, fields, scoreKey, obsKey) => {
-        doc.addPage();
-        drawTemplate(doc.internal.getNumberOfPages());
-        return drawAuditSection(title, fields, scoreKey, obsKey, 53);
-    };
-
-    currentY = addSectionOnNewPage("2. Procedure Qualification Records (PQR)", [
+    // (previous sections such as scope have already been drawn)
+    // Subsequent sections follow automatically; page breaks will occur only if content runs out of space
+    currentY = drawAuditSection("2. Procedure Qualification Records (PQR)", [
         { id: 'pqr_q1', label: 'PQRs were reviewed and verified against supporting test results?' },
         { id: 'pqr_q2', label: 'Mechanical test results met acceptance criteria as per API?' },
         { id: 'pqr_q3', label: 'Test coupons, thickness ranges, and essential variables were correctly addressed?' }
-    ], 'pqr_score', 'pqr_observations');
-
+    ], 'pqr_score', 'pqr_observations', currentY);
     currentY = drawAuditSection("3. Welder Qualification and Continuity", [
         { id: 'welder_q1', label: 'Welders were qualified in accordance with the applicable WPS variable range.?' },
         { id: 'welder_q2', label: 'Welder qualification records (WQRs) were available ?' },
@@ -262,12 +277,12 @@ export const generateWeldAuditAction = async (doc, data, currentY, contentWidth,
         { id: 'welder_q5', label: 'Weld repair matrix maintained?' }
     ], 'welder_score', 'welder_observations', currentY);
 
-    currentY = addSectionOnNewPage("4. Welding Consumables Control", [
+    currentY = drawAuditSection("4. Welding Consumables Control", [
         { id: 'cons_q1', label: 'Storage per manufacturer recommendations?' },
         { id: 'cons_q2', label: 'Baking/holding procedures available?' },
         { id: 'cons_q3', label: 'Baking/holding records available?' },
         { id: 'cons_q4', label: 'Consumables traceable to heat/batch?' }
-    ], 'cons_score', 'cons_observations');
+    ], 'cons_score', 'cons_observations', currentY);
 
     currentY = drawAuditSection("5. Joint Preparation and Fit-Up", [
         { id: 'joint_q1', label: 'Joint geometry complied with WPS?' },
@@ -284,11 +299,11 @@ export const generateWeldAuditAction = async (doc, data, currentY, contentWidth,
         { id: 'sup_q5', label: 'Welding machines calibrated?' }
     ], 'sup_score', 'sup_observations', currentY);
 
-    currentY = addSectionOnNewPage("7. Inspection and Testing (NDT)", [
+    currentY = drawAuditSection("7. Inspection and Testing (NDT)", [
         { id: 'ndt_q1', label: 'QC Engineers are certified?' },
         { id: 'ndt_q2', label: 'NDT personnel certified?' },
         { id: 'ndt_q3', label: 'Inspection procedures approved?' }
-    ], 'ndt_score', 'ndt_observations');
+    ], 'ndt_score', 'ndt_observations', currentY);
 
     currentY = drawAuditSection("8. Record and Documentation", [
         { id: 'rec_q1', label: 'Applicable WPS-PQR available?' },

@@ -64,9 +64,10 @@ export const AuthProvider = ({ children }) => {
     }
   }, [fetchMe]);
 
-  const masterSignIn = useCallback(async (email, password, secretKey) => {
+  const masterSignIn = useCallback(async (email, password) => {
     try {
-      const response = await api.post('/auth/master-login', { email, password, secretKey });
+      const response = await api.post('/auth/master-login', { email, password });
+
       const { token, user: userData } = response.data;
 
       localStorage.setItem('token', token);

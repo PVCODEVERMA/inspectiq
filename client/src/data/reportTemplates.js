@@ -12,8 +12,8 @@ import {
 
 export const reportTemplates = {
     'ultrasonic-test': {
-        title: 'Ultrasonic Test',
-        subTitle: 'QCWS/NDT/F-01',
+        title: 'ULTRASONIC TEST REPORT',
+        subTitle: 'QCWS/NDT/F-02',
         icon: Activity,
         color: 'text-blue-600',
         bg: 'bg-blue-50',
@@ -23,12 +23,12 @@ export const reportTemplates = {
                 title: 'General Information',
                 icon: ClipboardCheck,
                 fields: [
-                    { id: 'client_name', label: 'Client', type: 'text', placeholder: 'Enter Client Name' },
-                    { id: 'report_no', label: 'Report No', type: 'text', placeholder: 'Auto / Manual' },
-                    { id: 'vendor_name', label: 'Vendor', type: 'text', placeholder: 'Enter Vendor Name' },
-                    { id: 'date', label: 'Date', type: 'date' },
-                    { id: 'item_tested', label: 'Item Tested', type: 'text', placeholder: 'Description of item' },
-                    { id: 'location', label: 'Inspection Location', type: 'text', placeholder: 'Site / Factory' }
+                    { id: 'client_name', label: 'CLIENT', type: 'text', placeholder: 'Enter Client Name' },
+                    { id: 'report_no', label: 'REPORT NO', type: 'text', placeholder: 'Auto / Manual' },
+                    { id: 'vendor_name', label: 'VENDOR', type: 'text', placeholder: 'Enter Vendor Name' },
+                    { id: 'date', label: 'DATE', type: 'date' },
+                    { id: 'item_tested', label: 'ITEM TESTED', type: 'text', placeholder: 'Description of item' },
+                    { id: 'location', label: 'INSPECTION LOCATION', type: 'text', placeholder: 'Site / Factory' }
                 ]
             },
             {
@@ -36,12 +36,12 @@ export const reportTemplates = {
                 title: 'Technical Specifications',
                 icon: FileSearch,
                 fields: [
-                    { id: 'welding_process', label: 'Welding Process', type: 'text' },
-                    { id: 'material_spec', label: 'Material Spec', type: 'text' },
-                    { id: 'surface_condition', label: 'Surface Condition', type: 'text' },
-                    { id: 'procedure_no', label: 'Procedure No', type: 'text' },
-                    { id: 'surface_temp', label: 'Surface Temperature', type: 'text' },
-                    { id: 'acceptance_std', label: 'Acceptance Standard', type: 'text' }
+                    { id: 'welding_process', label: 'WELDING PROCESS', type: 'text' },
+                    { id: 'material_spec', label: 'MATERIAL SPEC', type: 'text' },
+                    { id: 'surface_condition', label: 'SURFACE CONDITION', type: 'text' },
+                    { id: 'procedure_no', label: 'PROCEDURE NO', type: 'text' },
+                    { id: 'surface_temp', label: 'SURFACE TEMPERATURE', type: 'text' },
+                    { id: 'acceptance_std', label: 'ACCEPTANCE STANDARD', type: 'text' }
                 ]
             },
             {
@@ -49,12 +49,12 @@ export const reportTemplates = {
                 title: 'Equipment & Technique',
                 icon: Zap,
                 fields: [
-                    { id: 'test_methods', label: 'Test Methods', type: 'text' },
-                    { id: 'instrument_make', label: 'Instrument Make', type: 'text' },
-                    { id: 'test_technique', label: 'Test Technique', type: 'text' },
-                    { id: 'instrument_id', label: 'Instrument ID', type: 'text' },
-                    { id: 'couplant', label: 'Type of Couplant', type: 'text' },
-                    { id: 'cable_type', label: 'Type of Cable', type: 'text' }
+                    { id: 'test_methods', label: 'TEST METHODS', type: 'text' },
+                    { id: 'instrument_make', label: 'INSTRUMENT MAKE', type: 'text' },
+                    { id: 'test_technique', label: 'TEST TECHNIQUE', type: 'text' },
+                    { id: 'instrument_id', label: 'INSTRUMENTS ID', type: 'text' },
+                    { id: 'couplant', label: 'TYPE OF COUPLANT', type: 'text' },
+                    { id: 'cable_type', label: 'TYPE OF CABLE', type: 'text' }
                 ]
             },
             {
@@ -64,13 +64,13 @@ export const reportTemplates = {
                 fields: [
                     {
                         id: 'calibration_blocks',
-                        label: 'Calibration Blocks Used',
+                        label: 'CALIBRATION BLOCKS USED',
                         type: 'checkbox_group',
                         options: ['IIW V1', 'V2']
                     },
                     {
                         id: 'probes',
-                        label: 'Probe Parameters',
+                        label: 'PROBE PARAMETERS',
                         type: 'grid_input',
                         columns: ['0°', '45°', '60°', '70°'],
                         rows: ['Dimension', 'Frequency', 'Reference Gain', 'Range']
@@ -82,7 +82,19 @@ export const reportTemplates = {
                 title: 'Scanning Sketch',
                 icon: Activity,
                 fields: [
-                    { id: 'scanning_sketch', label: 'Upload Sketch', type: 'image_upload' }
+                    { id: 'scanning_sketch', label: 'SCANNING SKETCH', type: 'image_upload' }
+                ]
+            },
+            {
+                id: 'findings',
+                title: 'Final Summary',
+                icon: FileSearch,
+                fields: [
+                    {
+                        id: 'summary_text',
+                        label: 'REMARKS',
+                        type: 'textarea'
+                    }
                 ]
             },
             {
@@ -91,12 +103,12 @@ export const reportTemplates = {
                 icon: ShieldCheck,
                 type: 'dynamic_table',
                 columns: [
-                    { key: 'item_name', label: 'Item Name / Number', type: 'text' },
-                    { key: 'barrage_no', label: 'Number of Barrage', type: 'text' },
-                    { key: 'scan_type', label: 'Type of Scanning', type: 'text' },
-                    { key: 'qty', label: 'Qty', type: 'number' },
-                    { key: 'observations', label: 'Observations', type: 'text' },
-                    { key: 'result', label: 'Result', type: 'select', options: ['Accept', 'Reject'] }
+                    { key: 'item_name', label: 'ITEM NAME / NUMBER', type: 'text' },
+                    { key: 'barrage_no', label: 'NUMBER OF BARRAGE', type: 'text' },
+                    { key: 'scan_type', label: 'TYPE OF SCANNING', type: 'text' },
+                    { key: 'qty', label: 'QTY.', type: 'number' },
+                    { key: 'observations', label: 'OBSERVATIONS', type: 'text' },
+                    { key: 'result', label: 'RESULT', type: 'select', options: ['Accept', 'Reject'] }
                 ]
             }
         ]

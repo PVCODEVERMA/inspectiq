@@ -28,6 +28,7 @@ const CreateInspectionModal = ({ isOpen, onClose, services = [], clients = [], o
     // Form State
     const [formData, setFormData] = useState({
         // Basic Info
+        report_no: '',
         serviceId: '',
         inspectionType: '',
         clientName: '',
@@ -136,8 +137,12 @@ const CreateInspectionModal = ({ isOpen, onClose, services = [], clients = [], o
 
                 // Basic required fields for LiftInspection model compatibility if not fully generic yet
                 lift_identification_no: 'N/A', // Placeholder
-                report_no: null // Auto-generated
             };
+
+            // remove report_no if it's not provided (backend will auto-generate)
+            if (formData.report_no) {
+                payload.report_no = formData.report_no;
+            }
 
             await api.post('/inspections', payload);
             toast.success("Inspection Created Successfully!");
@@ -186,6 +191,10 @@ const CreateInspectionModal = ({ isOpen, onClose, services = [], clients = [], o
                         {/* STEP 1: BASIC INFO */}
                         {currentStep === 1 && (
                             <div className="grid grid-cols-2 gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                                <div className="space-y-2">
+                                    <Label>Report Number</Label>
+                                    <Input value={formData.report_no} onChange={e => handleChange('report_no', e.target.value)} placeholder="Auto-generated or enter manually" />
+                                </div>
                                 <div className="space-y-2">
                                     <Label>Service Name *</Label>
                                     <Select value={formData.serviceId} onValueChange={v => handleChange('serviceId', v)}>

@@ -179,7 +179,7 @@ export const IndustrialFormUI = ({
                                                             <label className="relative flex flex-col items-center justify-center gap-2 h-24 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-primary/40 transition-colors cursor-pointer group">
                                                                 <Upload className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
                                                                 <span className="text-xs font-semibold text-slate-500 group-hover:text-primary transition-colors text-center px-2">Gallery</span>
-                                                                <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handlePhotoUpload(e, field.id)} accept="image/*" multiple />
+                                                                <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handlePhotoUpload(e, field.id)} accept="image/*,video/*" multiple />
                                                             </label>
                                                             <button type="button" onClick={() => { setCameraFieldId(field.id); setCameraOpen(true); }} className="relative flex flex-col items-center justify-center gap-2 h-24 w-full rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-primary/40 transition-colors cursor-pointer group">
                                                                 <Camera className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
@@ -298,8 +298,7 @@ export const IndustrialFormUI = ({
 
             {cameraOpen && (
                 <CameraCapture
-                    onCapture={(blob) => {
-                        const file = new File([blob], `capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                    onCapture={(file) => {
                         handlePhotoUpload({ target: { files: [file] } }, cameraFieldId);
                         setCameraOpen(false);
                     }}

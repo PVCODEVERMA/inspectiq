@@ -138,30 +138,50 @@ mongoose
   .then(async () => {
     console.log("Connected to MongoDB");
 
-    // Optional: Safe index migration
-    try {
-      const LPT = require("./models/ndt/LiquidPenetrantInspection");
-      const collection = LPT.collection;
-      const indexes = await collection.indexes();
+    // Optional: Safe index migration - remove unique constraint on report_no from all models
+    const migrateModel = async (modelPath, modelName) => {
+      try {
+        const Model = require(modelPath);
+        const collection = Model.collection;
+        const indexes = await collection.indexes();
 
-      const oldIndex = indexes.find(
-        (idx) => idx.key && idx.key.report_no === 1 && !idx.sparse
-      );
-
-      if (oldIndex) {
-        await collection.dropIndex(oldIndex.name);
-        await collection.createIndex(
-          { report_no: 1 },
-          { unique: true, sparse: true }
+        // Drop any unique index on report_no
+        const uniqueIndex = indexes.find(
+          (idx) => idx.key && idx.key.report_no === 1 && idx.unique
         );
-        console.log("[MIGRATION] report_no index updated to sparse");
+
+        if (uniqueIndex) {
+          await collection.dropIndex(uniqueIndex.name);
+          console.log(`[MIGRATION] ${modelName}: Dropped unique index on report_no`);
+        }
+
+        // Ensure sparse index exists (but not unique)
+        const sparseIndex = indexes.find(
+          (idx) => idx.key && idx.key.report_no === 1 && idx.sparse && !idx.unique
+        );
+
+        if (!sparseIndex) {
+          await collection.createIndex(
+            { report_no: 1 },
+            { sparse: true }
+          );
+          console.log(`[MIGRATION] ${modelName}: Created sparse (non-unique) index on report_no`);
+        }
+      } catch (migErr) {
+        console.warn(
+          `[MIGRATION] ${modelName} migration skipped:`,
+          migErr.message
+        );
       }
-    } catch (migErr) {
-      console.warn(
-        "[MIGRATION] report_no index migration skipped:",
-        migErr.message
-      );
-    }
+    };
+
+    // Run migrations for all report models
+    await migrateModel("./models/ndt/LiquidPenetrantInspection", "LiquidPenetrantInspection");
+    await migrateModel("./models/ndt/MagneticParticleInspection", "MagneticParticleInspection");
+    await migrateModel("./models/ndt/UltrasonicInspection", "UltrasonicInspection");
+    await migrateModel("./models/ndt/NDTSummaryInspection", "NDTSummaryInspection");
+    await migrateModel("./models/tpi/EngineeringInspection", "EngineeringInspection");
+    await migrateModel("./models/consultancy/WeldingAssessmentAudit", "WeldingAssessmentAudit");
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

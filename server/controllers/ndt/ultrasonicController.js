@@ -9,15 +9,12 @@ exports.createReport = async (req, res) => {
             created_by: req.user._id
         };
 
-        // Remove empty report_no to trigger auto-generation in pre-save hook
-        if (!reportData.report_no || reportData.report_no === '' || reportData.report_no === 'Auto' || reportData.report_no === 'Auto / Manual') {
-            delete reportData.report_no;
-        }
+        // ALWAYS remove report_no to trigger auto-generation
+        delete reportData.report_no;
 
         // Remove empty probes object and clean empty fields
         Object.keys(reportData).forEach(key => {
             const value = reportData[key];
-            // Remove empty strings, null, undefined, NaN, empty objects
             if (value === '' || value === null || value === undefined || (typeof value === 'number' && isNaN(value))) {
                 if (!['client_name', 'formType', 'status', 'created_by'].includes(key)) {
                     delete reportData[key];
@@ -37,9 +34,7 @@ exports.createReport = async (req, res) => {
             const messages = Object.values(error.errors).map(val => val.message);
             return res.status(400).json({ message: `Validation Error: ${messages.join(', ')}` });
         }
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Report Number already exists. Please use a unique Report No.' });
-        }
+
         res.status(500).json({ message: error.message });
     }
 };

@@ -1,44 +1,36 @@
 const LiquidPenetrantInspection = require('../../models/ndt/LiquidPenetrantInspection');
 
-// Create Report — with retry on duplicate report_no collision
+// Create Report
 exports.createReport = async (req, res) => {
-    const saveWithRetry = async (reportData, attempt = 0) => {
-        const doc = new LiquidPenetrantInspection({ ...reportData });
-        if (attempt > 0) delete doc.report_no; // force pre-save to pick fresh number
-        try {
-            await doc.save();
-            return doc;
-        } catch (err) {
-            if (err.code === 11000 && attempt < 3) {
-                // Race condition: another request grabbed the same auto-number, retry
-                return saveWithRetry(reportData, attempt + 1);
-            }
-            throw err;
-        }
-    };
-
     try {
         let reportData = { ...req.body, created_by: req.user._id };
 
-        // Standardize field names
-        reportData.client_name = reportData.client_name || reportData.client;
-        reportData.report_no = reportData.report_no || reportData.reportNo;
-
-        // Let pre-save hook auto-generate if blank/auto
-        if (!reportData.report_no || ['Auto', 'Auto / Manual', ''].includes(reportData.report_no)) {
+        // Ensure report_no is handled correctly
+        if (reportData.report_no === '' || !reportData.report_no) {
             delete reportData.report_no;
         }
 
-        const report = await saveWithRetry(reportData);
+        // Clean empty fields that might cause validation issues
+        Object.keys(reportData).forEach(key => {
+            const value = reportData[key];
+            if (value === '' || value === null || value === undefined || (typeof value === 'number' && isNaN(value))) {
+                if (!['client_name', 'formType', 'status', 'created_by'].includes(key)) {
+                    delete reportData[key];
+                }
+            }
+            else if (Array.isArray(value) && value.length === 0 && key !== 'results') {
+                delete reportData[key];
+            }
+        });
+
+        const report = new LiquidPenetrantInspection(reportData);
+        await report.save();
         res.status(201).json(report);
     } catch (error) {
         console.error('CREATE LPT REPORT ERROR:', error);
         if (error.name === 'ValidationError') {
             const messages = Object.values(error.errors).map(v => v.message);
             return res.status(400).json({ message: `Validation Error: ${messages.join(', ')}` });
-        }
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Report Number already exists. Please try again.' });
         }
         res.status(500).json({ message: error.message });
     }
@@ -86,8 +78,13 @@ exports.updateReport = async (req, res) => {
             query.created_by = req.user._id;
         }
 
-        // Strip immutable fields — never allow report_no/_id to be changed
-        const { report_no, _id, created_by, ...safeBody } = req.body;
+        // Allow report_no to be updated if provided; remove only _id and created_by
+        const { _id, created_by, ...safeBody } = req.body;
+
+        // if client cleared report_no, drop it so we keep existing number
+        if (safeBody.report_no === '') {
+            delete safeBody.report_no;
+        }
 
         const report = await LiquidPenetrantInspection.findOneAndUpdate(
             query,
@@ -98,8 +95,10 @@ exports.updateReport = async (req, res) => {
         if (!report) return res.status(404).json({ message: 'Report not found' });
         res.status(200).json(report);
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Report Number already exists.' });
+        console.error('UPDATE LPT REPORT ERROR:', error);
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(v => v.message);
+            return res.status(400).json({ message: `Validation Error: ${messages.join(', ')}` });
         }
         res.status(500).json({ message: error.message });
     }
@@ -134,7 +133,7 @@ exports.getNextReportNo = async (req, res) => {
             }
         }
 
-        const nextReportNo = `PT-${year}-${nextNum.toString().padStart(4, '0')}`;
+        const nextReportNo = `LPT-${year}-${nextNum.toString().padStart(4, '0')}`;
         res.status(200).json({ nextReportNo });
     } catch (error) {
         console.error('GET NEXT REPORT NO ERROR:', error);

@@ -23,7 +23,7 @@ const liquidPenetrantInspectionSchema = new mongoose.Schema({
 
     // Basic Details
     client_name: { type: String, trim: true },
-    report_no: { type: String, trim: true, unique: true, sparse: true },
+    report_no: { type: String, trim: true, sparse: true },
     vendor: { type: String, trim: true },
     date: { type: Date, default: Date.now },
     item: { type: String, trim: true },
@@ -84,29 +84,36 @@ const liquidPenetrantInspectionSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// Pre-save hook for Report No — only runs on NEW documents (not updates)
-liquidPenetrantInspectionSchema.pre('save', async function () {
-    if (this.isNew && !this.report_no) {
+// Pre-validate hook for Report No — ensures it's generated BEFORE validation
+liquidPenetrantInspectionSchema.pre('validate', async function () {
+    if (!this.report_no) {
         const year = new Date().getFullYear();
-        const prefix = `PT-${year}-`;
+        const prefix = `LPT-${year}-`;
 
-        // Fetch all reports for the current year to find the true numeric maximum
-        const reports = await this.constructor.find(
-            { report_no: new RegExp(`^${prefix}`) },
-            { report_no: 1 }
-        );
+        try {
+            // Use the main 'counters' collection for report sequence
+            const db = mongoose.connection.db;
+            const countersCollection = db.collection('counters');
 
-        let maxNum = 0;
-        reports.forEach(r => {
-            const parts = r.report_no.split('-');
-            if (parts.length >= 3) {
-                const num = parseInt(parts[2], 10);
-                if (!isNaN(num) && num > maxNum) maxNum = num;
-            }
-        });
+            const counter = await countersCollection.findOneAndUpdate(
+                { _id: `lpt_${year}` },
+                { $inc: { seq: 1 } },
+                { upsert: true, returnDocument: 'after' }
+            );
 
-        this.report_no = `${prefix}${(maxNum + 1).toString().padStart(4, '0')}`;
-        console.log(`[LPT-GEN] Generated ${this.report_no}`);
+            const nextSeq = counter.value?.seq || 1;
+            this.report_no = `${prefix}${nextSeq.toString().padStart(4, '0')}`;
+            console.log(`[LPT-GEN] Generated report number: ${this.report_no}`);
+        } catch (error) {
+            console.error('[LPT] Counter error:', error);
+            // Fallback: scan database for highest report number
+            const reports = await this.constructor.countDocuments({
+                report_no: new RegExp(`^LPT-${new Date().getFullYear()}-`)
+            });
+
+            this.report_no = `${prefix}${(reports + 1).toString().padStart(4, '0')}`;
+            console.log(`[LPT-GEN-FALLBACK] Generated report number: ${this.report_no}`);
+        }
     }
 });
 

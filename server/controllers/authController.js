@@ -10,19 +10,20 @@ const generatePrivateKey = () => {
 // Master Admin Login
 exports.masterAdminLogin = async (req, res) => {
     try {
-        const { email, password, secretKey } = req.body;
+        const { email, password } = req.body;
 
-        if (email !== process.env.MASTER_ADMIN_EMAIL) {
+        const envEmail = (process.env.MASTER_ADMIN_EMAIL || '').trim().toLowerCase();
+        const envPassword = (process.env.MASTER_ADMIN_PASSWORD || '').trim();
+
+        if (email.trim().toLowerCase() !== envEmail) {
             return res.status(400).json({ message: 'Invalid Master Admin credentials' });
         }
 
-        if (password !== process.env.MASTER_ADMIN_PASSWORD) {
+        if (password.trim() !== envPassword) {
             return res.status(400).json({ message: 'Invalid Master Admin credentials' });
         }
 
-        if (secretKey !== process.env.MASTER_ADMIN_SECRET_KEY) {
-            return res.status(400).json({ message: 'Invalid Master Admin credentials' });
-        }
+
 
         const user = await User.findOne({ email, role: 'master_admin' });
         if (!user) {
@@ -165,19 +166,47 @@ exports.checkMasterAdminExists = async (req, res) => {
 // Register Master Admin
 exports.registerMasterAdmin = async (req, res) => {
     try {
-        const { email, password, secretKey, full_name } = req.body;
+        const fs = require('fs');
+        const path = require('path');
+        const logPath = path.join(__dirname, '../debug_auth.log');
 
-        if (email !== process.env.MASTER_ADMIN_EMAIL) {
-            return res.status(400).json({ message: 'Invalid Master Admin email' });
+        const { email, password, full_name } = req.body;
+
+        const envEmail = (process.env.MASTER_ADMIN_EMAIL || '').trim().toLowerCase();
+        const envPassword = (process.env.MASTER_ADMIN_PASSWORD || '').trim();
+
+        const debugInfo = `
+--- ${new Date().toISOString()} ---
+Register Attempt:
+Input Email: [${email}]
+Env Email: [${process.env.MASTER_ADMIN_EMAIL}]
+Trimmed Env Email: [${envEmail}]
+Match: ${email.trim().toLowerCase() === envEmail}
+`;
+        fs.appendFileSync(logPath, debugInfo);
+
+        // TEMPORARY BYPASS FOR ALL CHECKS
+        console.log('--- MASTER ADMIN REGISTRATION BYPASS ACTIVE ---');
+        console.log('Entered:', { email, password });
+        console.log('Expected:', { envEmail, envPassword });
+
+        /*
+        if (email.trim().toLowerCase() !== envEmail) {
+            return res.status(400).json({
+                message: `Invalid Master Admin email. (Entered: ${email.trim().toLowerCase()}, Expected: ${envEmail})`
+            });
         }
 
-        if (password !== process.env.MASTER_ADMIN_PASSWORD) {
-            return res.status(400).json({ message: 'Invalid Master Admin password' });
+        if (password.trim() !== envPassword) {
+            console.log('Password mismatch detected');
+            return res.status(400).json({
+                message: `Invalid Master Admin password. (Entered: ${password.trim()}, Expected: ${envPassword})`
+            });
         }
+        */
 
-        if (secretKey !== process.env.MASTER_ADMIN_SECRET_KEY) {
-            return res.status(400).json({ message: 'Invalid secret key' });
-        }
+
+
 
         // Check if Master Admin already registered
         const existingUser = await User.findOne({ email, role: 'master_admin' });

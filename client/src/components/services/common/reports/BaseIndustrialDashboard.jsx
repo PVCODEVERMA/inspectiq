@@ -59,10 +59,10 @@ const BaseIndustrialDashboard = () => {
 
             // Fetch All Inspection Types in Parallel
             const endpoints = [
+                '/ndt/liquid-penetrant',
                 '/inspections',
                 '/ndt/ultrasonic',
                 '/ndt/magnetic-particle',
-                '/ndt/liquid-penetrant',
                 '/ndt/summary'
             ];
 

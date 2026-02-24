@@ -73,19 +73,29 @@ export const drawCheckboxGroup = (doc, label, options, values, startX, y, fontNa
     });
 };
 
-export const drawInfoRow = (doc, label1, value1, label2, value2, y, contentWidth, fontName = "times") => {
+export const drawInfoRow = (doc, label1, value1, label2, value2, y, contentWidth, fontName = "times", fontSize = 10) => {
     const rowH = 7;
     doc.rect(MARGIN, y, contentWidth, rowH);
     const mid = MARGIN + (contentWidth / 2);
     const textY = y + 5;
 
-    doc.setFontSize(11);
+    doc.setFontSize(fontSize);
     doc.setFont(fontName, "bold");
     doc.text(label1, MARGIN + BOX_PAD, textY);
 
     const label1Width = doc.getTextWidth(label1);
     doc.setFont(fontName, "normal");
-    doc.text(String(value1 || ''), MARGIN + BOX_PAD + label1Width + BOX_PAD, textY);
+
+    // Add truncation to prevent overlap with second column
+    let val1 = String(value1 || '');
+    if (label2) {
+        const maxWidth = (contentWidth / 2) - label1Width - (BOX_PAD * 3);
+        if (doc.getTextWidth(val1) > maxWidth) {
+            val1 = doc.splitTextToSize(val1, maxWidth)[0];
+            if (val1.length < String(value1).length) val1 += '...';
+        }
+    }
+    doc.text(val1, MARGIN + BOX_PAD + label1Width + BOX_PAD, textY);
 
     if (label2) {
         doc.setFont(fontName, "bold");
@@ -93,14 +103,21 @@ export const drawInfoRow = (doc, label1, value1, label2, value2, y, contentWidth
 
         const label2Width = doc.getTextWidth(label2);
         doc.setFont(fontName, "normal");
-        doc.text(String(value2 || ''), mid + BOX_PAD + label2Width + BOX_PAD, textY);
+
+        let val2 = String(value2 || '');
+        const maxWidth = (contentWidth / 2) - label2Width - (BOX_PAD * 3);
+        if (doc.getTextWidth(val2) > maxWidth) {
+            val2 = doc.splitTextToSize(val2, maxWidth)[0];
+            if (val2.length < String(value2).length) val2 += '...';
+        }
+        doc.text(val2, mid + BOX_PAD + label2Width + BOX_PAD, textY);
     }
 
     return y + rowH;
 };
 
 export const checkPageBreak = (doc, currentY, pageHeight, requiredSpace, drawTemplateFn) => {
-    if (currentY + requiredSpace > pageHeight - 45) {
+    if (currentY + requiredSpace > pageHeight - 60) {
         doc.addPage();
         drawTemplateFn(doc.internal.getNumberOfPages());
         return 40; // Reset Y position
@@ -146,10 +163,10 @@ export const drawStandardTemplate = (doc, pageNumber, totalPages, template, font
     doc.setDrawColor(0);
     doc.setLineWidth(0.1);
 
-    // Header Box Structure - Height 26mm (20 to 46)
-    doc.rect(MARGIN, 20, contentWidth, 26);
-    doc.rect(MARGIN, 20, 45, 26); // Logo Box
-    doc.rect(pageWidth - MARGIN - 45, 20, 45, 26); // Ref Box
+    // Header Box Structure - Height 30mm (20 to 50)
+    doc.rect(MARGIN, 20, contentWidth, 30);
+    doc.rect(MARGIN, 20, 45, 30); // Logo Box
+    doc.rect(pageWidth - MARGIN - 45, 20, 45, 30); // Ref Box
 
     // Logo
     try {
@@ -166,16 +183,16 @@ export const drawStandardTemplate = (doc, pageNumber, totalPages, template, font
     // With equal boxes (45mm each), the center is exactly the page center
     const titleCenterX = pageWidth / 2;
 
-    const isWeldingAudit = template.id === 'welding-assessment-audit' || (template.title && template.title.includes("Welding Assessment"));
+    const isWeldingAudit = ['weld-audit', 'welding-assessment-audit'].includes(template.id) || (template.title && template.title.includes("Welding Assessment"));
 
     if (isWeldingAudit) {
         doc.setFontSize(16);
-        doc.text("Welding Assessment", titleCenterX, 30, { align: 'center' });
-        doc.text("Audit Report", titleCenterX, 38, { align: 'center' });
+        doc.text("Welding Assessment", titleCenterX, 32, { align: 'center' });
+        doc.text("Audit Report", titleCenterX, 42, { align: 'center' });
     } else {
         const titleMain = (template.title || "INSPECTION REPORT").toUpperCase().replace(/\s*REPORT$/i, '').trim();
-        doc.text(titleMain, titleCenterX, 29.5, { align: 'center' });
-        doc.text("REPORT", titleCenterX, 39.5, { align: 'center' });
+        doc.text(titleMain, titleCenterX, 32, { align: 'center' });
+        doc.text("REPORT", titleCenterX, 42, { align: 'center' });
     }
 
     // Reference
@@ -185,40 +202,18 @@ export const drawStandardTemplate = (doc, pageNumber, totalPages, template, font
     // Divider line at middle of box (20 + 13 = 33)
     doc.line(pageWidth - MARGIN - 45, 33, pageWidth - MARGIN, 33);
 
-    // Top inner (20 to 33) -> Center ~26.5
-    doc.text(template.subTitle || "QCWS/F-01", refCenterX, 26.5, { align: 'center' });
-    // Bottom inner (33 to 46) -> Center ~39.5
-    doc.text("REV.01", refCenterX, 39.5, { align: 'center' });
+    // Top inner (20 to 33) -> Center ~26
+    doc.text(template.subTitle || "QCWS/F-01", refCenterX, 27, { align: 'center' });
+    // Bottom inner (33 to 45) -> Center ~38.5
+    doc.text("REV.01", refCenterX, 42.5, { align: 'center' });
 
-    // 3. Footer — same BOX_PAD and ROW_GAP as other boxes
+    // no footer or signature drawing here; page numbers and report title handled below
+    // but we still need dimensions for the separator and page number box
     const footerRow1 = BOX_PAD + 4;
     const footerRow2 = footerRow1 + ROW_GAP;
     const footerRow3 = footerRow2 + ROW_GAP;
     const footerBoxH = footerRow3 + ROW_GAP;
     const finalY = pageHeight - 35;
-    doc.rect(MARGIN, finalY, contentWidth, footerBoxH);
-    doc.line(MARGIN + (contentWidth / 2), finalY, MARGIN + (contentWidth / 2), finalY + footerBoxH);
-
-    const isAudit = template.id === 'Weld-audit' || template.title?.includes("Assessment");
-    const testLabel = isAudit ? "AUDITED BY:" : "TESTED BY:";
-
-    doc.setFontSize(10);
-    doc.setFont(primaryFont, "bold");
-    doc.text("SIGN:", MARGIN + BOX_PAD, finalY + footerRow1);
-    doc.text("DATE:", MARGIN + BOX_PAD, finalY + footerRow2);
-    doc.text(testLabel, MARGIN + BOX_PAD, finalY + footerRow3);
-
-    doc.text("SIGN:", MARGIN + (contentWidth / 2) + BOX_PAD, finalY + footerRow1);
-    doc.text("DATE:", MARGIN + (contentWidth / 2) + BOX_PAD, finalY + footerRow2);
-    doc.text("REVIEWED BY:", MARGIN + (contentWidth / 2) + BOX_PAD, finalY + footerRow3);
-
-    doc.setFont(primaryFont, "normal");
-    doc.setFontSize(9);
-    const testedByName = data.tested_by_name || data.audited_by_name || '';
-    const reviewedByName = data.reviewed_by_name || '';
-
-    doc.text(String(testedByName), MARGIN + BOX_PAD + (doc.getTextWidth(testLabel) + BOX_PAD), finalY + footerRow3);
-    doc.text(String(reviewedByName), MARGIN + (contentWidth / 2) + BOX_PAD + (doc.getTextWidth("REVIEWED BY:") + BOX_PAD), finalY + footerRow3);
 
     const boxSize = 8;
     const boxX = pageWidth - MARGIN - boxSize;
@@ -257,6 +252,45 @@ export const drawStandardTemplate = (doc, pageNumber, totalPages, template, font
     }
 
     doc.text(footerDisplay, MARGIN + BOX_PAD, titleY);
+};
+
+// helper that should be called once after full document generated
+export const drawSignatureFooterOnLastPage = (doc, template, data) => {
+    const pageCount = doc.internal.getNumberOfPages();
+
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const contentWidth = pageWidth - (MARGIN * 2);
+    const footerRow1 = BOX_PAD + 4;
+    const footerRow2 = footerRow1 + ROW_GAP;
+    const footerRow3 = footerRow2 + ROW_GAP;
+    const footerBoxH = footerRow3 + ROW_GAP;
+    const finalY = pageHeight - 35;
+
+    doc.setPage(pageCount);
+    doc.rect(MARGIN, finalY, contentWidth, footerBoxH);
+    doc.line(MARGIN + (contentWidth / 2), finalY, MARGIN + (contentWidth / 2), finalY + footerBoxH);
+
+    // always draw the signature labels on the final page regardless of template
+    const testLabel = "TESTED BY:";
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("SIGN:", MARGIN + BOX_PAD, finalY + footerRow1);
+    doc.text("DATE:", MARGIN + BOX_PAD, finalY + footerRow2);
+    doc.text(testLabel, MARGIN + BOX_PAD, finalY + footerRow3);
+
+    doc.text("SIGN:", MARGIN + (contentWidth / 2) + BOX_PAD, finalY + footerRow1);
+    doc.text("DATE:", MARGIN + (contentWidth / 2) + BOX_PAD, finalY + footerRow2);
+    doc.text("WITNESSED/REVIEWED BY( TPI/CLIENT):", MARGIN + (contentWidth / 2) + BOX_PAD, finalY + footerRow3);
+
+    doc.setFont(FONTS.primary, "normal");
+    doc.setFontSize(9);
+    const auditedByName = data.audited_by_name || '';
+    const reviewedByName = data.reviewed_by_name || '';
+
+    doc.text(String(auditedByName), MARGIN + BOX_PAD + (doc.getTextWidth(testLabel) + BOX_PAD), finalY + footerRow3);
+    const witnessLabel = "WITNESSED/REVIEWED BY( TPI/CLIENT):";
+    doc.text(String(reviewedByName), MARGIN + (contentWidth / 2) + BOX_PAD + (doc.getTextWidth(witnessLabel) + BOX_PAD), finalY + footerRow3);
 };
 
 // --- TPI Section Header ---

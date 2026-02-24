@@ -15,17 +15,13 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'react-hot-toast';
 import {
-    Save,
     Download,
     ChevronLeft,
     Check,
-    Upload,
-    Trash2,
-    ChevronsUpDown,
     Plus,
     X,
     Printer,
-    Camera,
+    ChevronsUpDown,
     ClipboardCheck,
     FileSearch,
     FlaskConical,
@@ -47,8 +43,6 @@ import {
     CommandItem,
     CommandList,
 } from "@/components/ui/command";
-import CameraCapture from '@/components/ui/CameraCapture';
-import ImageViewer from '@/components/ui/ImageViewer';
 
 const LPT = () => {
     const { id, serviceType, inspectionId } = useParams();
@@ -66,20 +60,16 @@ const LPT = () => {
     const isSavingRef = useRef(false);
     // Tracks the saved report _id synchronously (state updates are async and cause duplicate POST)
     const savedIdRef = useRef(reportId || null);
-    const [cameraOpen, setCameraOpen] = useState(false);
-    const [cameraFieldId, setCameraFieldId] = useState(null);
     const [clients, setClients] = useState([]);
     const [clientSearch, setClientSearch] = useState("");
     const [clientSearchOpen, setClientSearchOpen] = useState(false);
-    const [viewerOpen, setViewerOpen] = useState(false);
-    const [viewerData, setViewerData] = useState(null);
 
     const [formData, setFormData] = useState({
         serviceId: validServiceId || '',
         formType: 'liquid-penetrant',
         status: 'draft',
-        client_name: '',
         report_no: '',
+        client_name: '',
         vendor_name: '',
         date: new Date().toISOString().split('T')[0],
         item: '',
@@ -99,8 +89,7 @@ const LPT = () => {
         light_intensity: '',
         developing_time: '',
         results: [],
-        findings_any: '',
-        photos: []
+        findings_any: ''
     });
 
     useEffect(() => {
@@ -171,35 +160,7 @@ const LPT = () => {
         }
     };
 
-    const handlePhotoUpload = async (e, fieldId = 'photos') => {
-        const files = e.target.files;
-        if (!files || files.length === 0) return;
 
-        const uploadPromises = Array.from(files).map(async (file) => {
-            const uploadData = new FormData();
-            uploadData.append('photo', file);
-            try {
-                const response = await api.post('/upload/single', uploadData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                return { url: `http://localhost:5000${response.data.url}`, name: file.name };
-            } catch (error) {
-                console.error("Upload error:", error);
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve({ url: reader.result, name: file.name });
-                    reader.readAsDataURL(file);
-                });
-            }
-        });
-
-        const newImages = await Promise.all(uploadPromises);
-        setFormData(prev => ({
-            ...prev,
-            [fieldId]: [...(Array.isArray(prev[fieldId]) ? prev[fieldId] : []), ...newImages]
-        }));
-        toast.success("Photos added");
-    };
 
     const handleTableAdd = () => {
         const emptyRow = { item_name: '', observations: '', result: 'Accept' };
@@ -242,7 +203,7 @@ const LPT = () => {
                 inspection_date: formData.date
             };
 
-            // Mapping for backend model compatibility
+            // Map fields
             payload.testResults = formData.results;
             payload.penetrantTypeCheck = formData.penetrant_type_check;
             payload.developerFormCheck = formData.developer_form_check;
@@ -253,13 +214,15 @@ const LPT = () => {
             const effectiveId = reportId || savedIdRef.current;
 
             if (effectiveId) {
-                // Strip report_no from PUT to avoid unique-index conflict
-                const { report_no, _id, ...updatePayload } = payload;
+                // Update existing report (allow report_no to be changed)
+                const { _id, ...updatePayload } = payload;
                 const res = await api.put(`${endpoint}/${effectiveId}`, updatePayload);
                 savedReport = res.data;
                 if (!exportMode) toast.success(isDraft ? "Draft Updated!" : "Report Updated!");
             } else {
-                const res = await api.post(endpoint, payload);
+                // Create new report (backend will auto-generate if report_no blank)
+                const { _id, ...createPayload } = payload;
+                const res = await api.post(endpoint, createPayload);
                 savedReport = res.data;
                 // Store the ID immediately in ref so the next call uses PUT
                 savedIdRef.current = savedReport._id;
@@ -278,7 +241,8 @@ const LPT = () => {
             if (!exportMode && !isDraft) navigate(-1);
         } catch (error) {
             console.error("Save Error:", error);
-            toast.error(error.response?.data?.message || "Operation failed");
+            const errorMsg = error.response?.data?.message || error.message || "Operation failed";
+            toast.error(errorMsg);
         } finally {
             setIsLoading(false);
             setTimeout(() => { isSavingRef.current = false; }, 1000);
@@ -306,6 +270,10 @@ const LPT = () => {
                     </div>
                     <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
+                            <Label className="text-sm font-bold text-slate-700">Report Number</Label>
+                            <Input id="report_no" className="h-12 bg-slate-50 border-slate-200" value={formData.report_no} onChange={handleInputChange} placeholder="Auto-generated or enter manually" />
+                        </div>
+                        <div className="space-y-2">
                             <Label className="text-sm font-bold text-slate-700">Client</Label>
                             <Popover open={clientSearchOpen} onOpenChange={setClientSearchOpen}>
                                 <PopoverTrigger asChild>
@@ -332,10 +300,6 @@ const LPT = () => {
                                     </Command>
                                 </PopoverContent>
                             </Popover>
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-sm font-bold text-slate-700">Report No <span className="text-xs font-normal text-slate-400">(leave blank to auto-generate)</span></Label>
-                            <Input id="report_no" className="h-12 bg-slate-50 border-slate-200" value={formData.report_no || ''} onChange={handleInputChange} placeholder="e.g. PT-2026-0001" />
                         </div>
                         <div className="space-y-2">
                             <Label className="text-sm font-bold text-slate-700">Vendor</Label>
@@ -517,34 +481,11 @@ const LPT = () => {
                     </div>
                 </div>
 
-                {/* Section 6: Findings & Photos */}
+                {/* Section 6: Findings */}
                 <div className="bg-white rounded-[2rem] shadow-premium border border-slate-100 p-8 space-y-6">
                     <div className="space-y-2">
                         <Label className="text-sm font-bold text-slate-700">Findings If Any</Label>
                         <Textarea id="findings_any" className="bg-slate-50 border-slate-200 min-h-[100px]" value={formData.findings_any} onChange={handleInputChange} />
-                    </div>
-
-                    <div className="space-y-4">
-                        <Label className="font-bold">Photos</Label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            {formData.photos.map((img, idx) => (
-                                <div key={idx} className="group relative aspect-square rounded-2xl overflow-hidden border-2 border-slate-200">
-                                    <img src={img.url} className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                        <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full" onClick={() => setFormData(p => ({ ...p, photos: p.photos.filter((_, i) => i !== idx) }))}><Trash2 className="w-4 h-4" /></Button>
-                                    </div>
-                                </div>
-                            ))}
-                            <label className="flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 cursor-pointer">
-                                <Upload className="w-6 h-6 text-slate-400" />
-                                <span className="text-xs font-bold text-slate-500">Upload</span>
-                                <input type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" multiple />
-                            </label>
-                            <button type="button" onClick={() => setCameraOpen(true)} className="flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100">
-                                <Camera className="w-6 h-6 text-slate-400" />
-                                <span className="text-xs font-bold text-slate-500">Camera</span>
-                            </button>
-                        </div>
                     </div>
                 </div>
 
@@ -559,21 +500,6 @@ const LPT = () => {
                     </div>
                 </div>
             </div>
-
-            <CameraCapture
-                open={cameraOpen}
-                onCapture={(imgObj) => {
-                    // CameraCapture returns { url, name } object directly
-                    setFormData(prev => ({
-                        ...prev,
-                        photos: [...(Array.isArray(prev.photos) ? prev.photos : []), { url: imgObj.url, name: imgObj.name || `capture_${Date.now()}.jpg` }]
-                    }));
-                    toast.success('Photo captured!');
-                    setCameraOpen(false);
-                }}
-                onClose={() => setCameraOpen(false)}
-                title="Capture Photo"
-            />
         </div>
     );
 };

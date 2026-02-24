@@ -36,21 +36,17 @@ const AuthPage = () => {
 
   // Password visibility states
   const [showPassword, setShowPassword] = useState(false);
-  const [showSecretKey, setShowSecretKey] = useState(false);
   const [showMasterPassword, setShowMasterPassword] = useState(false);
-  const [showMasterSecretKey, setShowMasterSecretKey] = useState(false);
 
   // Login State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [secretKey, setSecretKey] = useState('');
 
   // Master Admin Register State
   const [masterRegData, setMasterRegData] = useState({
     full_name: '',
     email: '',
     password: '',
-    secretKey: '',
     avatar: null,
   });
   const [masterAvatarPreview, setMasterAvatarPreview] = useState(null);
@@ -101,7 +97,7 @@ const AuthPage = () => {
         const { error } = await signIn(email, password);
         if (!error) navigate('/dashboard');
       } else {
-        const { error } = await masterSignIn(email, password, secretKey);
+        const { error } = await masterSignIn(email, password);
         if (!error) navigate('/dashboard');
       }
     } catch (err) {
@@ -119,7 +115,6 @@ const AuthPage = () => {
     formData.append('full_name', masterRegData.full_name);
     formData.append('email', masterRegData.email);
     formData.append('password', masterRegData.password);
-    formData.append('secretKey', masterRegData.secretKey);
     if (masterRegData.avatar) formData.append('avatar', masterRegData.avatar);
 
     try {
@@ -299,30 +294,7 @@ const AuthPage = () => {
                     </div>
                   </div>
 
-                  {loginType === 'master' && (
-                    <div className="space-y-2 animate-scale-in">
-                      <Label htmlFor="secretKey" className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 ml-1">Master Secret Key</Label>
-                      <div className="relative group">
-                        <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                        <Input
-                          id="secretKey"
-                          type={showSecretKey ? "text" : "password"}
-                          placeholder="Secret Protocol Key"
-                          value={secretKey}
-                          onChange={(e) => setSecretKey(e.target.value)}
-                          className="pl-12 pr-12 h-14 bg-background/50 border-border/50 focus:ring-primary/20 transition-all rounded-xl border-primary/20"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowSecretKey(!showSecretKey)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-                  )}
+
 
                   <Button
                     type="submit"
@@ -403,26 +375,7 @@ const AuthPage = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-bold uppercase ml-1 opacity-60">Master Secret Key (System wide)</Label>
-                    <div className="relative">
-                      <Input
-                        type={showMasterSecretKey ? "text" : "password"}
-                        placeholder="Protocol Secret"
-                        value={masterRegData.secretKey}
-                        onChange={(e) => setMasterRegData({ ...masterRegData, secretKey: e.target.value })}
-                        required
-                        className="border-primary/20 pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowMasterSecretKey(!showMasterSecretKey)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {showMasterSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+
 
                   <Button type="submit" className="w-full h-12 mt-4 font-bold" disabled={isRegisteringMaster}>
                     {isRegisteringMaster ? <RefreshCw className="w-5 h-5 animate-spin" /> : 'Activate Master Account'}

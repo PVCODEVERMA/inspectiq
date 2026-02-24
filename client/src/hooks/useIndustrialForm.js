@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import api from '@/lib/api';
+import api, { API_BASE_URL } from '@/lib/api';
 import { reportTemplates } from '@/data/reportTemplates';
 import { industrialReportTypes } from '@/data/industrialReportTypes';
 
@@ -183,7 +183,7 @@ export const useIndustrialForm = () => {
         if (!file) return;
 
         const uploadData = new FormData();
-        uploadData.append('photo', file);
+        uploadData.append('photos', file);
 
         const appendImage = (url, name) => {
             setFormData(prev => {
@@ -196,7 +196,8 @@ export const useIndustrialForm = () => {
             const response = await api.post('/upload/single', uploadData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            const url = `http://localhost:5000${response.data.url}`;
+            // construct absolute URL using configured base API URL
+            const url = `${API_BASE_URL}${response.data.url}`;
             appendImage(url, file.name);
             toast.success("Photo uploaded");
         } catch (error) {
@@ -293,11 +294,15 @@ export const useIndustrialForm = () => {
 
             let savedReport;
             if (reportId) {
-                const res = await api.put(`${endpoint}/${reportId}`, payload);
+                // Strip report_no and _id from PUT to avoid conflicts
+                const { report_no, _id, ...updatePayload } = payload;
+                const res = await api.put(`${endpoint}/${reportId}`, updatePayload);
                 savedReport = res.data;
                 if (!pdfAction) toast.success(isDraft ? "Draft Updated Successfully!" : "Report Updated Successfully!");
             } else {
-                const res = await api.post(endpoint, payload);
+                // Strip report_no and _id from POST to allow backend auto-generation
+                const { report_no, _id, ...createPayload } = payload;
+                const res = await api.post(endpoint, createPayload);
                 savedReport = res.data;
                 setFormData(prev => ({ ...prev, ...savedReport }));
                 if (!pdfAction) toast.success(isDraft ? "Draft Saved Successfully!" : "Report Submitted Successfully!");
