@@ -78,17 +78,7 @@ export const Header = ({ title, shortTitle, subtitle }) => {
       </div>
 
       <div className="flex items-center gap-4 rounded-full">
-        {/* Quick New (Desktop) */}
-        {role !== 'inspector' && (
-          <Button
-            size="sm"
-            className="hidden md:flex bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-full h-10 px-4 gap-2 font-bold transition-all hover:scale-105 active:scale-95"
-            onClick={() => navigate('/inspections/new')}
-          >
-            <Plus className="w-4 h-4" />
-            New
-          </Button>
-        )}
+       
 
         {/* Search */}
         <div className="relative hidden md:block ">
