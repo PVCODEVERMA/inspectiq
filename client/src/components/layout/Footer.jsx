@@ -5,23 +5,23 @@ import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from 'luc
 
 export const Footer = () => {
     return (
-        <footer className="relative bg-sidebar border-t border-sidebar-border overflow-hidden">
+        <footer className="relative bg-[#000000] border-t  overflow-hidden">
             {/* Decorative background element */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#000000] rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
 
             <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                     {/* Brand Section */}
                     <div className="space-y-6">
                         <div className="flex items-center gap-3">
-                            <img src={logo} alt="Quality Concept" className="w-12 h-12 rounded-xl bg-white p-1" />
+                            <img src={logo} alt="Quality Concept Welding Solutions" className="w-12 h-12 rounded-xl bg-white p-1" />
                             <div className="text-sidebar-foreground">
                                 <h2 className="font-display font-bold text-xl leading-tight">Quality Concept</h2>
-                                <p className="text-xs text-sidebar-foreground/50">Inspection & Audit Portal</p>
+                                <p className="text-xs text-sidebar-foreground/50">Welding Solutions Pvt. Ltd.</p>
                             </div>
                         </div>
                         <p className="text-sidebar-foreground/60 text-sm leading-relaxed max-w-xs">
-                            Empowering industrial excellence through cutting-edge digital inspection and compliance solutions.
+                            Professional welding services for personal projects, repairs, and custom metal fabrication.
                         </p>
                         <div className="flex items-center gap-4">
                             <a href="#" className="w-9 h-9 rounded-lg bg-sidebar-accent flex items-center justify-center text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 transition-all">
@@ -99,10 +99,10 @@ export const Footer = () => {
 
                 <div className="mt-16 pt-8 border-t border-sidebar-border/50 flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-xs text-sidebar-foreground/40 italic">
-                        Confidential & Protected - Quality Concept Group Properties
+                        Quality Concept Welding Solutions - Precision & Strength
                     </p>
                     <p className="text-xs text-sidebar-foreground/40">
-                        &copy; {new Date().getFullYear()} Quality Concept. All rights reserved.
+                        &copy; {new Date().getFullYear()} QC Welding Solutions. All rights reserved.
                     </p>
                 </div>
             </div>

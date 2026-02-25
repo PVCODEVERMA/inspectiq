@@ -52,8 +52,8 @@ export const Header = ({ title, shortTitle, subtitle }) => {
 
         <div className={cn("flex flex-col min-w-0 transition-opacity duration-200", isSearchOpen ? "hidden sm:flex" : "flex")}>
           <h1 className="text-lg font-bold text-white truncate leading-tight mt-1">
-            <span className="sm:hidden">{shortTitle || title || 'InspectIQ'}</span>
-            <span className="hidden sm:inline">{title || 'Dashboard'}</span>
+            <span className="sm:hidden">{shortTitle || title || 'QCWS'}</span>
+            <span className="hidden sm:inline">{title || 'QC Welding'}</span>
           </h1>
           {subtitle && (
             <p className="text-xs text-white/80 truncate hidden md:block">

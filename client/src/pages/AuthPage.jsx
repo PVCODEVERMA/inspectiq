@@ -22,7 +22,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import logo from '@/assets/qcws-logo.png';
+import logohome from '@/assets/logohome.png';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 import api, { API_BASE_URL } from '@/lib/api';
@@ -147,12 +147,8 @@ const AuthPage = () => {
 
         <div className="relative z-10 space-y-8">
           <div className="flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/')}>
-            <div className="bg-white p-2 rounded-2xl shadow-xl transition-transform group-hover:scale-105">
-              <img src={logo} alt="Quality Concept" className="w-12 h-12" />
-            </div>
             <div>
-              <h1 className="font-display font-black text-2xl text-sidebar-foreground tracking-tight">Quality Concept</h1>
-              <p className="text-[10px] font-bold  uppercase tracking-[0.3em] leading-none">Global Compliance</p>
+              <img src={logohome} alt="Quality Concept" className="h-10 sm:h-12 object-contain transition-transform group-hover:scale-105" />
             </div>
           </div>
 
@@ -184,8 +180,7 @@ const AuthPage = () => {
         {/* Top bar for mobile / mobile logo */}
         <div className="lg:hidden p-6 flex justify-between items-center border-b border-border/50 bg-background/80">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="QC" className="w-8 h-8" />
-            <span className="font-display font-bold">Quality Concept</span>
+            <img src={logohome} alt="QC" className="h-8 object-contain" />
           </div>
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
             <ChevronLeft className="w-4 h-4 mr-2" /> Back

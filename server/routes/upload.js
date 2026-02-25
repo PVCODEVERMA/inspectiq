@@ -7,7 +7,7 @@ const auth = require('../middleware/auth');
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
-    limits: { fileSize: 10000000 }, // 10MB limit
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
 }).array("photos", 10);
 
 router.post("/", auth, (req, res) => {

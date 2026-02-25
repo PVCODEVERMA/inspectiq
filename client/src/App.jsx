@@ -41,6 +41,7 @@ const BaseIndustrialDashboard = lazy(() => import("./components/services/common/
 const ReportDispatcher = lazy(() => import("./components/services/common/reports/ReportDispatcher"));
 const BaseIndustrialReports = lazy(() => import("./components/services/common/reports/BaseIndustrialReports"));
 const BaseIndustrialNewSelection = lazy(() => import("./components/services/common/reports/BaseIndustrialNewSelection"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,9 @@ const App = () => (
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/login" element={<AuthPage />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/booking" element={<Contact />} />
+                  <Route path="/consultation" element={<Contact />} />
 
                   {/* Dashboard Routes with Layout - Protected */}
                   <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
