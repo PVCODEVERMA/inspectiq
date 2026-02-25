@@ -13,9 +13,10 @@ const baseNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['super_admin', 'company_admin', 'inspector', 'master_admin'] },
   {
     icon: Shield,
-    label: 'Members',
+    label: 'Administration',
     roles: ['master_admin'],
     subItems: [
+      { icon: Building2, label: 'Company Profile', path: '/admin/company-profile' },
       { icon: UserPlus, label: 'Create Member', path: '/key-generation' },
       { icon: Users, label: 'Member Details', path: '/admin' },
     ]

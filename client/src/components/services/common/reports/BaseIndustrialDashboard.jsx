@@ -50,6 +50,12 @@ const BaseIndustrialDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [isNavigating, setIsNavigating] = useState(false);
+
+    const handleStatClick = (status) => {
+        setIsNavigating(true);
+        navigate(`/admin/services/${id}/${serviceType}/reports?status=${status}`);
+    };
 
     const fetchData = async () => {
         setIsLoading(true);
@@ -136,11 +142,11 @@ const BaseIndustrialDashboard = () => {
         });
     }, [inspections]);
 
-    if (isLoading) {
+    if (isLoading || isNavigating) {
         return (
             <div className="min-h-screen bg-background/50 pb-12">
                 {/* Header visible during loading */}
-                <Header title={service?.name || "Loading..."} subtitle={`${serviceType?.toUpperCase()} Dashboard`} />
+                <Header title={service?.name || "Loading..."} subtitle={isNavigating ? "Opening Reports..." : `${serviceType?.toUpperCase()} Dashboard`} />
 
                 <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-8">
                     {/* Skeleton Action Button */}
@@ -225,7 +231,7 @@ const BaseIndustrialDashboard = () => {
 
                 {/* KPI Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card onClick={() => navigate(`/admin/services/${id}/${serviceType}/reports?status=all`)} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
+                    <Card onClick={() => handleStatClick('all')} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
                         <CardContent className="p-3 lg:p-6 flex justify-between items-center">
                             <div>
                                 <p className="text-[10px] lg:text-xs font-bold text-muted-foreground uppercase tracking-widest">Total Reports</p>
@@ -237,7 +243,7 @@ const BaseIndustrialDashboard = () => {
                         </CardContent>
                     </Card>
 
-                    <Card onClick={() => navigate(`/admin/services/${id}/${serviceType}/reports?status=approved`)} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
+                    <Card onClick={() => handleStatClick('approved')} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
                         <CardContent className="p-3 lg:p-6 flex justify-between items-center">
                             <div>
                                 <p className="text-[10px] lg:text-xs font-bold text-green-600 uppercase tracking-widest">Approved</p>
@@ -249,7 +255,7 @@ const BaseIndustrialDashboard = () => {
                         </CardContent>
                     </Card>
 
-                    <Card onClick={() => navigate(`/admin/services/${id}/${serviceType}/reports?status=pending`)} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
+                    <Card onClick={() => handleStatClick('pending')} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
                         <CardContent className="p-3 lg:p-6 flex justify-between items-center">
                             <div>
                                 <p className="text-[10px] lg:text-xs font-bold text-amber-600 uppercase tracking-widest">Pending</p>
@@ -261,7 +267,7 @@ const BaseIndustrialDashboard = () => {
                         </CardContent>
                     </Card>
 
-                    <Card onClick={() => navigate(`/admin/services/${id}/${serviceType}/reports?status=rejected`)} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
+                    <Card onClick={() => handleStatClick('rejected')} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
                         <CardContent className="p-3 lg:p-6 flex justify-between items-center">
                             <div>
                                 <p className="text-[10px] lg:text-xs font-bold text-red-600 uppercase tracking-widest">Rejected</p>

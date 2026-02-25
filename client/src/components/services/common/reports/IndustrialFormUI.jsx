@@ -338,7 +338,7 @@ export const IndustrialFormUI = ({
                                 <ArrowLeft className="w-5 h-5" /> Back
                             </Button>
 
-                            <Button variant="outline" size="icon" className="h-12 sm:h-14 w-12 sm:w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] hover:text-white transition-all shadow-sm shrink-0" onClick={() => handleSave(true, 'print')} disabled={isLoading}>
+                            <Button variant="outline" size="icon" className="hidden sm:flex h-12 sm:h-14 w-12 sm:w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] hover:text-white transition-all shadow-sm shrink-0" onClick={() => handleSave(true, 'print')} disabled={isLoading}>
                                 <Printer className="w-5 h-5" />
                             </Button>
 

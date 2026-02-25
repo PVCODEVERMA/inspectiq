@@ -85,47 +85,58 @@ export const InspectionTable = ({
     <div className="glass-card rounded-2xl overflow-hidden animate-fade-in">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/50">
-            <TableHead className="font-semibold">Report No</TableHead>
-            <TableHead className="font-semibold">Type</TableHead>
-            <TableHead className="font-semibold">Client / Vendor</TableHead>
-            <TableHead className="font-semibold">Inspector</TableHead>
-            <TableHead className="font-semibold">Status</TableHead>
-            <TableHead className="font-semibold">Date</TableHead>
-            {showActions && <TableHead className="text-right font-semibold">Actions</TableHead>}
+          <TableRow className="bg-muted/50 border-none">
+            <TableHead className="font-bold text-slate-800">Report No</TableHead>
+            <TableHead className="font-bold text-slate-800 hidden md:table-cell">Type</TableHead>
+            <TableHead className="font-bold text-slate-800">Client / Project</TableHead>
+            <TableHead className="font-bold text-slate-800 hidden lg:table-cell">Inspector</TableHead>
+            <TableHead className="font-bold text-slate-800">Status</TableHead>
+            <TableHead className="font-bold text-slate-800 hidden sm:table-cell">Date</TableHead>
+            {showActions && <TableHead className="text-right font-bold text-slate-800">Actions</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {inspections.map((inspection, index) => (
             <TableRow
               key={inspection._id}
-              className="hover:bg-muted/30 cursor-pointer transition-colors animate-slide-up"
+              className="hover:bg-primary/5 cursor-pointer transition-colors border-b border-slate-50 group"
               style={{ animationDelay: `${index * 50}ms` }}
               onClick={() => navigate(getFormPath(inspection.inspection_type, inspection._id, inspection.formType))}
             >
-              <TableCell className="font-medium">{inspection.report_no || inspection._id.slice(-6).toUpperCase()}</TableCell>
-              <TableCell>
-                <Badge className={cn('rounded-full', typeConfig[inspection.inspection_type]?.class || 'bg-slate-100')}>
+              <TableCell className="font-bold text-primary py-4">
+                {inspection.report_no || inspection._id.slice(-6).toUpperCase()}
+                <p className="md:hidden text-[10px] text-muted-foreground font-normal mt-0.5 capitalize">
+                  {inspection.formType || inspection.inspection_type}
+                </p>
+              </TableCell>
+              <TableCell className="hidden md:table-cell">
+                <Badge className={cn('rounded-xl font-bold px-3 py-1', typeConfig[inspection.inspection_type]?.class || 'bg-slate-100')}>
                   {typeConfig[inspection.inspection_type]?.label || inspection.formType || inspection.inspection_type}
                 </Badge>
               </TableCell>
-              <TableCell>
-                <div>
-                  <p className="font-medium">{inspection.client_name}</p>
-                  <p className="text-xs text-muted-foreground">{inspection.vendor_name || 'N/A'}</p>
+              <TableCell className="py-4">
+                <div className="max-w-[150px] sm:max-w-none">
+                  <p className="font-bold text-slate-900 truncate">{inspection.client_name}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{inspection.project_name || inspection.vendor_name || 'N/A'}</p>
                 </div>
               </TableCell>
-              <TableCell>{inspection.inspector_name}</TableCell>
+              <TableCell className="hidden lg:table-cell font-medium text-slate-600">{inspection.inspector_name}</TableCell>
               <TableCell>
-                <span className={cn('status-badge', statusConfig[inspection.status]?.class)}>
+                <Badge className={cn(
+                  "rounded-full px-3 py-1 font-black text-[10px] uppercase",
+                  inspection.status === 'approved' ? "bg-green-100 text-green-700" :
+                    inspection.status === 'pending' ? "bg-amber-100 text-amber-700" :
+                      inspection.status === 'rejected' ? "bg-red-100 text-red-700" :
+                        "bg-gray-100 text-gray-700"
+                )}>
                   {statusConfig[inspection.status]?.label || inspection.status}
-                </span>
+                </Badge>
               </TableCell>
-              <TableCell className="text-muted-foreground">
+              <TableCell className="hidden sm:table-cell text-slate-500 font-medium whitespace-nowrap">
                 {inspection.inspection_date || inspection.date ? format(new Date(inspection.inspection_date || inspection.date), 'MMM dd, yyyy') : 'N/A'}
               </TableCell>
               {showActions && (
-                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                <TableCell className="text-right py-4" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon">

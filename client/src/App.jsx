@@ -29,8 +29,11 @@ const VerifyReport = lazy(() => import("./pages/VerifyReport"));
 const KeyGeneration = lazy(() => import("./pages/KeyGeneration"));
 const ServicesManagement = lazy(() => import("./pages/ServicesManagement"));
 const ClientManagement = lazy(() => import("./pages/ClientManagement"));
+const AddClientPage = lazy(() => import("./pages/AddClientPage"));
+const EditClientPage = lazy(() => import("./pages/EditClientPage"));
 const ClientDetailDashboard = lazy(() => import("./pages/ClientDetailDashboard"));
 const AddMemberPage = lazy(() => import("./pages/AddMemberPage"));
+const CompanyProfile = lazy(() => import("./pages/CompanyProfile"));
 
 // Specialized Service Pages
 const BaseIndustrialDashboard = lazy(() => import("./components/services/common/reports/BaseIndustrialDashboard"));
@@ -58,6 +61,7 @@ const App = () => (
                   <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/admin" element={<SuperAdminDashboard />} />
+                    <Route path="/admin/company-profile" element={<CompanyProfile />} />
                     <Route path="/key-generation" element={<KeyGeneration />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/inspections" element={<InspectionsPage />} />
@@ -83,6 +87,8 @@ const App = () => (
 
                     <Route path="/admin/services" element={<ServicesManagement />} />
                     <Route path="/admin/clients" element={<ClientManagement />} />
+                    <Route path="/admin/clients/new" element={<AddClientPage />} />
+                    <Route path="/admin/clients/:id/edit" element={<EditClientPage />} />
                     <Route path="/admin/clients/:id" element={<ClientDetailDashboard />} />
                   </Route>
 

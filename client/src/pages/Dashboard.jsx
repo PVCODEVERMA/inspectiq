@@ -1,8 +1,6 @@
 import React from 'react';
 import { Header } from '@/components/layout/Header';
 import Fuse from 'fuse.js';
-import { MetricCard } from '@/components/dashboard/MetricCard';
-import { InspectionTable } from '@/components/dashboard/InspectionTable';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { InspectionTrendChart, InspectionStatusChart } from '@/components/dashboard/InspectionChart';
@@ -16,22 +14,19 @@ import {
   Users2,
   Boxes,
   ChevronRight,
-  FileText,
   Search
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useNavigate, Link } from 'react-router-dom';
+
+import { useNavigate } from 'react-router-dom';
 import { PremiumMetricCard } from '@/components/dashboard/PremiumMetricCard';
 import { useSidebar } from '@/contexts/SidebarContext';
 import api from '@/lib/api';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard = () => {
   const { profile, role } = useAuth();
-  const { searchQuery, setSearchQuery } = useSidebar();
+  const { searchQuery, setSearchQuery, isSearchOpen } = useSidebar();
   const navigate = useNavigate();
   const [services, setServices] = React.useState([]);
   const [inspections, setInspections] = React.useState([]);
@@ -70,12 +65,7 @@ const Dashboard = () => {
     return () => { active = false; };
   }, [searchQuery]);
 
-  const getWelcomeMessage = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'GM';
-    if (hour < 17) return 'GA';
-    return 'GE';
-  };
+
 
   const getRoleTitle = () => {
     switch (role) {
@@ -107,7 +97,7 @@ const Dashboard = () => {
     return { services: matchedServices, reports: matchedReports };
   }, [searchQuery, services, inspections]);
 
-  const userName = profile?.full_name?.split(' ')[0] || profile?.email?.split('@')[0] || 'User';
+  const showSearchUI = searchQuery || isSearchOpen;
 
   return (
     <div className="min-h-screen">
@@ -116,17 +106,19 @@ const Dashboard = () => {
       />
 
       <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
-        {searchQuery ? (
+
+
+        {showSearchUI ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Search Results - Services */}
-            {(filteredResults.services.length > 0 || isSearching) && (
+            {(filteredResults.services.length > 0 || isSearching || !searchQuery) && (
               <div className="space-y-4">
                 <h2 className="text-xl font-display font-black flex items-center gap-2">
                   <Briefcase className="w-6 h-6 text-primary" />
-                  Matching Services {isSearching && <Skeleton className="h-6 w-24" />}
+                  Search result {(isSearching || !searchQuery) && <Skeleton className="h-6 w-24" />}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {isSearching ? (
+                  {(isSearching || !searchQuery) ? (
                     [1, 2, 3].map(i => (
                       <Card key={`s-skeleton-${i}`} className="rounded-3xl border-none shadow-premium overflow-hidden">
                         <CardContent className="p-6 space-y-4">
@@ -183,66 +175,9 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* Search Results - Reports */}
-            {(filteredResults.reports.length > 0 || isSearching) && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-display font-black flex items-center gap-2 pt-4">
-                  <FileText className="w-6 h-6 text-primary" />
-                  Matching Reports {isSearching && <Skeleton className="h-6 w-24" />}
-                </h2>
-                <div className="rounded-[2.5rem] border-none shadow-premium bg-white overflow-hidden">
-                  <table className="w-full text-left">
-                    <thead className="bg-secondary/30">
-                      <tr>
-                        <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Report #</th>
-                        <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Client / Project</th>
-                        <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/50">
-                      {isSearching ? (
-                        [1, 2, 3, 4].map(i => (
-                          <tr key={`r-skeleton-${i}`}>
-                            <td className="px-6 py-5"><Skeleton className="h-5 w-24" /></td>
-                            <td className="px-6 py-5 space-y-2">
-                              <Skeleton className="h-5 w-48" />
-                              <Skeleton className="h-3 w-32" />
-                            </td>
-                            <td className="px-6 py-5"><Skeleton className="h-6 w-20 rounded-full" /></td>
-                          </tr>
-                        ))
-                      ) : (
-                        filteredResults.reports.map(insp => (
-                          <tr key={insp._id} className="hover:bg-primary/5 transition-colors group cursor-pointer" onClick={() => navigate(`/inspections/${insp._id}`)}>
-                            <td className="px-6 py-5">
-                              <span className="font-bold text-primary group-hover:underline">{insp.report_no || 'TBD'}</span>
-                            </td>
-                            <td className="px-6 py-5">
-                              <p className="font-bold text-foreground">{insp.client_name}</p>
-                              <p className="text-xs text-muted-foreground truncate max-w-[200px]">{insp.project_name || 'No Project'}</p>
-                            </td>
-                            <td className="px-6 py-5">
-                              <Badge className={cn(
-                                "rounded-full px-3 py-1 font-bold text-[10px] uppercase",
-                                insp.status === 'approved' ? "bg-green-100 text-green-700" :
-                                  insp.status === 'pending' ? "bg-amber-100 text-amber-700" :
-                                    insp.status === 'rejected' ? "bg-red-100 text-red-700" :
-                                      "bg-gray-100 text-gray-700"
-                              )}>
-                                {insp.status}
-                              </Badge>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
 
             {/* No Results Fallback */}
-            {filteredResults.services.length === 0 && filteredResults.reports.length === 0 && !isSearching && (
+            {searchQuery && filteredResults.services.length === 0 && filteredResults.reports.length === 0 && !isSearching && (
               <div className="flex flex-col items-center justify-center py-24 text-muted-foreground transition-all animate-in fade-in zoom-in duration-300">
                 <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mb-6">
                   <Search className="w-10 h-10 opacity-20" />

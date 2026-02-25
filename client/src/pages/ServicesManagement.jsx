@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
-import { cn } from '@/lib/utils';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useNavigate, Link } from 'react-router-dom';
 import { useSidebar } from '@/contexts/SidebarContext';
 import {
     Boxes,
     ChevronRight,
+    Users2,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'react-hot-toast';
@@ -62,7 +63,24 @@ const ServicesManagement = () => {
                 subtitle="Select a module to manage inspections and metrics"
             />
 
-            <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
+            <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
+                <div className="flex justify-between items-center bg-white/40 backdrop-blur-sm p-4 rounded-[2rem] border-2 border-slate-100 shadow-sm animate-in fade-in slide-in-from-top-3 duration-500">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                            <Users2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="font-bold text-slate-800 leading-none">Company Profile</p>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={() => navigate('/admin/clients')}
+                        className="rounded-xl bg-primary h-10 px-6 font-bold text-white shadow-glow"
+                    >
+                        Clients
+                    </Button>
+                </div>
+
                 {(isLoading || isFiltering) ? (
                     <div className="space-y-4">
                         {[1, 2, 3, 4, 5, 6].map(i => (

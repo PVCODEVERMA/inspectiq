@@ -22,12 +22,14 @@ export const QuickActions = () => {
         return [
           { icon: LayoutDashboard, label: 'Admin Dashboard', onClick: () => navigate('/admin') },
           { icon: Building2, label: 'Manage Companies', onClick: () => navigate('/companies') },
+          { icon: Users, label: 'Manage Clients', onClick: () => navigate('/admin/clients') },
           { icon: Users, label: 'Manage Users', onClick: () => navigate('/inspectors') },
           { icon: FileSearch, label: 'View All Inspections', onClick: () => navigate('/inspections') },
         ];
       case 'company_admin':
         return [
           { icon: Plus, label: 'New Inspection', onClick: () => navigate('/inspections/new') },
+          { icon: Users, label: 'Manage Clients', onClick: () => navigate('/admin/clients') },
           { icon: Users, label: 'View Inspectors', onClick: () => navigate('/inspectors') },
           { icon: FileSearch, label: 'View Inspections', onClick: () => navigate('/inspections') },
           { icon: Download, label: 'Export Reports', onClick: () => navigate('/reports') },

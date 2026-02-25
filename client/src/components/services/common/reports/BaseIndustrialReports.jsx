@@ -95,8 +95,43 @@ const BaseIndustrialReports = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div className="min-h-screen bg-background/50 pb-12">
+                <Header title="Loading Reports..." subtitle="Fetching latest records" />
+                <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+                    {/* Skeletons for Navigation & Tabs */}
+                    <div className="flex flex-col gap-6">
+                        <Skeleton className="h-10 w-40 rounded-xl" />
+                        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                            {[1, 2, 3, 4].map(i => (
+                                <Skeleton key={i} className="h-9 w-24 rounded-xl shrink-0" />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Skeleton for Filter Card */}
+                    <Card className="rounded-3xl border-none shadow-premium bg-white">
+                        <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
+                            <Skeleton className="h-10 flex-1 rounded-2xl" />
+                            <div className="flex gap-2">
+                                <Skeleton className="h-10 w-24 rounded-xl" />
+                                <Skeleton className="h-10 w-24 rounded-xl" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Skeleton for Table */}
+                    <Card className="rounded-[2.5rem] border-none shadow-premium bg-white overflow-hidden p-0">
+                        <div className="p-6 space-y-4">
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className="flex gap-4 items-center">
+                                    <Skeleton className="h-10 flex-1 rounded-xl" />
+                                    <Skeleton className="h-10 w-32 rounded-xl" />
+                                    <Skeleton className="h-10 w-24 rounded-xl" />
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+                </div>
             </div>
         );
     }
@@ -118,29 +153,29 @@ const BaseIndustrialReports = () => {
                 </Button>
 
                 {/* Status Tabs */}
-                <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
+                <div className="flex overflow-x-auto pb-2 gap-3 no-scrollbar">
                     {['all', 'approved', 'pending', 'rejected'].map((status) => (
-                        <Button
+                        <button
                             key={status}
-                            variant={statusFilter === status ? 'default' : 'outline'}
-                            size="sm"
                             onClick={() => {
                                 setStatusFilter(status);
                                 setSearchParams({ status });
                             }}
-                            className="capitalize rounded-xl whitespace-nowrap"
+                            className={cn(
+                                "flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold transition-all whitespace-nowrap border-2",
+                                statusFilter === status
+                                    ? "bg-primary border-primary text-white shadow-glow translate-y-[-2px]"
+                                    : "bg-white border-slate-100 text-slate-600 hover:border-primary/20 hover:bg-primary/5"
+                            )}
                         >
-                            {status}
-                            <Badge
-                                variant="secondary"
-                                className={cn(
-                                    "ml-2",
-                                    statusFilter === status ? "bg-primary-foreground/20 text-primary-foreground" : ""
-                                )}
-                            >
+                            <span className="capitalize">{status}</span>
+                            <span className={cn(
+                                "text-[10px] px-2 py-0.5 rounded-lg font-black",
+                                statusFilter === status ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                            )}>
                                 {counts[status]}
-                            </Badge>
-                        </Button>
+                            </span>
+                        </button>
                     ))}
                 </div>
 

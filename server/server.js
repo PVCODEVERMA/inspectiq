@@ -85,6 +85,7 @@ const ndtSummaryRoutes = require("./routes/ndt/ndtSummary");
 
 const engineeringRoutes = require("./routes/tpi/engineering");
 const weldingAuditRoutes = require("./routes/consultancy/weldingAssessmentAudit");
+const companyProfileRoutes = require("./routes/companyProfile");
 
 /* =========================
    🚀 Use Routes
@@ -106,6 +107,7 @@ app.use("/api/ndt/summary", ndtSummaryRoutes);
 
 app.use("/api/tpi/engineering", engineeringRoutes);
 app.use("/api/consultancy/welding-audit", weldingAuditRoutes);
+app.use("/api/company-profile", companyProfileRoutes);
 
 /* =========================
    📁 Static Files
