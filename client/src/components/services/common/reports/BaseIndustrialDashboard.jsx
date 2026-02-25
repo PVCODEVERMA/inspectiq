@@ -231,49 +231,49 @@ const BaseIndustrialDashboard = () => {
 
                 {/* KPI Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card onClick={() => handleStatClick('all')} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
-                        <CardContent className="p-3 lg:p-6 flex justify-between items-center">
+                    <Card onClick={() => handleStatClick('all')} className={cn("group rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
+                        <CardContent className="p-3 lg:p-6 flex justify-between items-center text-slate-800">
                             <div>
-                                <p className="text-[10px] lg:text-xs font-bold text-muted-foreground uppercase tracking-widest">Total Reports</p>
-                                <h3 className="text-xl lg:text-4xl font-black mt-1">{stats.total}</h3>
+                                <p className="text-[10px] lg:text-xs font-bold text-muted-foreground uppercase tracking-widest group-hover:text-primary transition-colors">Total Reports</p>
+                                <h3 className="text-xl lg:text-4xl font-black mt-1 group-hover:text-primary transition-colors">{stats.total}</h3>
                             </div>
-                            <div className="p-2 lg:p-4 bg-primary/10 text-primary rounded-xl lg:rounded-2xl">
+                            <div className="p-2 lg:p-4 bg-primary/10 text-primary rounded-xl lg:rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
                                 <FileText className="w-4 h-4 lg:w-6 lg:h-6" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card onClick={() => handleStatClick('approved')} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
-                        <CardContent className="p-3 lg:p-6 flex justify-between items-center">
+                    <Card onClick={() => handleStatClick('approved')} className={cn("group rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
+                        <CardContent className="p-3 lg:p-6 flex justify-between items-center text-slate-800">
                             <div>
-                                <p className="text-[10px] lg:text-xs font-bold text-green-600 uppercase tracking-widest">Approved</p>
+                                <p className="text-[10px] lg:text-xs font-bold text-green-600 uppercase tracking-widest group-hover:text-green-700 transition-colors">Approved</p>
                                 <h3 className="text-xl lg:text-4xl font-black mt-1 text-green-700">{stats.approved}</h3>
                             </div>
-                            <div className="p-2 lg:p-4 bg-green-100 text-green-600 rounded-xl lg:rounded-2xl">
+                            <div className="p-2 lg:p-4 bg-green-100 text-green-600 rounded-xl lg:rounded-2xl group-hover:bg-green-600 group-hover:text-white transition-colors">
                                 <CheckCircle2 className="w-4 h-4 lg:w-6 lg:h-6" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card onClick={() => handleStatClick('pending')} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
-                        <CardContent className="p-3 lg:p-6 flex justify-between items-center">
+                    <Card onClick={() => handleStatClick('pending')} className={cn("group rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
+                        <CardContent className="p-3 lg:p-6 flex justify-between items-center text-slate-800">
                             <div>
-                                <p className="text-[10px] lg:text-xs font-bold text-amber-600 uppercase tracking-widest">Pending</p>
+                                <p className="text-[10px] lg:text-xs font-bold text-amber-600 uppercase tracking-widest group-hover:text-amber-700 transition-colors">Pending</p>
                                 <h3 className="text-xl lg:text-4xl font-black mt-1 text-amber-700">{stats.pending}</h3>
                             </div>
-                            <div className="p-2 lg:p-4 bg-amber-100 text-amber-600 rounded-xl lg:rounded-2xl">
+                            <div className="p-2 lg:p-4 bg-amber-100 text-amber-600 rounded-xl lg:rounded-2xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
                                 <Clock className="w-4 h-4 lg:w-6 lg:h-6" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card onClick={() => handleStatClick('rejected')} className={cn("rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
-                        <CardContent className="p-3 lg:p-6 flex justify-between items-center">
+                    <Card onClick={() => handleStatClick('rejected')} className={cn("group rounded-3xl border-none shadow-premium cursor-pointer transition-all hover:scale-[1.02] active:scale-95 bg-white/40 backdrop-blur-sm")}>
+                        <CardContent className="p-3 lg:p-6 flex justify-between items-center text-slate-800">
                             <div>
-                                <p className="text-[10px] lg:text-xs font-bold text-red-600 uppercase tracking-widest">Rejected</p>
+                                <p className="text-[10px] lg:text-xs font-bold text-red-600 uppercase tracking-widest group-hover:text-red-700 transition-colors">Rejected</p>
                                 <h3 className="text-xl lg:text-4xl font-black mt-1 text-red-700">{stats.rejected}</h3>
                             </div>
-                            <div className="p-2 lg:p-4 bg-red-100 text-red-600 rounded-xl lg:rounded-2xl">
+                            <div className="p-2 lg:p-4 bg-red-100 text-red-600 rounded-xl lg:rounded-2xl group-hover:bg-red-600 group-hover:text-white transition-colors">
                                 <XCircle className="w-4 h-4 lg:w-6 lg:h-6" />
                             </div>
                         </CardContent>
@@ -343,25 +343,25 @@ const BaseIndustrialDashboard = () => {
                             </div>
                         </CardHeader>
                         <CardContent className="p-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <Button variant="outline" className="w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-primary/5 hover:border-primary/50 transition-all text-left">
+                            <Button variant="outline" className="group w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-primary/5 hover:border-primary/50 transition-all text-left border-slate-200">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                                         <TrendingUp className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="font-bold hover:text-[#F34034]">Operational Stats</p>
-                                        <p className="text-xs text-muted-foreground">Detailed performance analysis</p>
+                                        <p className="text-sm font-black text-slate-800 group-hover:text-primary transition-colors">Operational Stats</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group-hover:text-slate-500 transition-colors">Detailed performance analysis</p>
                                     </div>
                                 </div>
                             </Button>
-                            <Button variant="outline" className="w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-green-500/5 hover:border-green-500/50 transition-all text-left">
+                            <Button variant="outline" className="group w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-green-500/5 hover:border-green-500/50 transition-all text-left border-slate-200">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600">
+                                    <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
                                         <User className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="font-bold hover:text-[#F34034]">Assigned Inspectors</p>
-                                        <p className="text-xs text-muted-foreground">Manage field personnel</p>
+                                        <p className="text-sm font-black text-slate-800 group-hover:text-green-600 transition-colors">Assigned Inspectors</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group-hover:text-slate-500 transition-colors">Manage field personnel</p>
                                     </div>
                                 </div>
                             </Button>

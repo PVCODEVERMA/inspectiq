@@ -34,6 +34,7 @@ const EditClientPage = lazy(() => import("./pages/EditClientPage"));
 const ClientDetailDashboard = lazy(() => import("./pages/ClientDetailDashboard"));
 const AddMemberPage = lazy(() => import("./pages/AddMemberPage"));
 const CompanyProfile = lazy(() => import("./pages/CompanyProfile"));
+const MemberProfilePage = lazy(() => import("./pages/MemberProfilePage"));
 
 // Specialized Service Pages
 const BaseIndustrialDashboard = lazy(() => import("./components/services/common/reports/BaseIndustrialDashboard"));
@@ -62,6 +63,7 @@ const App = () => (
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/admin" element={<SuperAdminDashboard />} />
                     <Route path="/admin/company-profile" element={<CompanyProfile />} />
+                    <Route path="/admin/members/:id" element={<MemberProfilePage />} />
                     <Route path="/key-generation" element={<KeyGeneration />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/inspections" element={<InspectionsPage />} />

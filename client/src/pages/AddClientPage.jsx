@@ -50,7 +50,7 @@ const AddClientPage = () => {
                 subtitle="Add a new company to your inspection network"
             />
 
-            <div className="p-4 sm:p-6 max-w-[1600px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="p-4 sm:p-6 max-w-[1600px] mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex items-center justify-between">
                     <Button
                         variant="ghost"

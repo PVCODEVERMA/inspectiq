@@ -55,6 +55,10 @@ import {
   Pencil,
   User,
   Boxes,
+  Eye,
+  Calendar,
+  Mail,
+  Smartphone
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -250,111 +254,100 @@ const SuperAdminDashboard = () => {
 
           <TabsContent value="members">
             <Card>
-              <CardHeader>
+              <CardHeader className="border-b border-slate-50 pb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
-                    <CardTitle>Member Directory</CardTitle>
-                  </div>
-                  <div className="relative w-full sm:w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search members..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 w-full"
-                    />
+                    <CardTitle className="text-xl font-black tracking-tight">Member Directory</CardTitle>
+                    <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">System-wide team access overview</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-0 sm:p-6">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Member</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Phone</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Joined</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {isLoading ? (
-                        [1, 2, 3, 4, 5].map(i => (
-                          <TableRow key={`user-skeleton-${i}`}>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <Skeleton className="w-10 h-10 rounded-full" />
-                                <Skeleton className="h-4 w-32" />
+              <CardContent className="bg-slate-50/30">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-4 sm:p-8">
+                  {isLoading ? (
+                    [1, 2, 3, 4, 5, 6].map(i => (
+                      <Card key={`skeleton-${i}`} className="border-none shadow-premium rounded-[28px] bg-white h-64 flex flex-col p-6 space-y-4">
+                        <div className="flex items-center gap-4">
+                          <Skeleton className="w-14 h-14 rounded-full" />
+                          <div className="space-y-2">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-3 w-20" />
+                          </div>
+                        </div>
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
+                        <div className="pt-4 flex gap-2">
+                          <Skeleton className="h-10 flex-1 rounded-xl" />
+                          <Skeleton className="h-10 w-10 rounded-xl" />
+                        </div>
+                      </Card>
+                    ))
+                  ) : filteredUsers.length === 0 ? (
+                    <div className="col-span-full py-20 text-center space-y-4 opacity-30">
+                      <Users className="w-20 h-20 mx-auto" />
+                      <p className="text-sm font-black uppercase tracking-widest">No members found in this node</p>
+                    </div>
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <Card key={user._id} className="border-none shadow-premium hover:shadow-xl transition-all duration-300 rounded-[32px] overflow-hidden group bg-white border border-slate-100 flex flex-col h-full animate-in fade-in slide-in-from-bottom-4">
+                        <CardContent className="p-6 flex flex-col h-full space-y-5">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-4 min-w-0">
+                              <Avatar className="w-14 h-14 border-2 border-slate-50 shadow-sm shrink-0">
+                                <AvatarImage src={getFileUrl(user.profile?.avatar_url)} />
+                                <AvatarFallback className="bg-primary/5 text-primary text-lg font-black uppercase">
+                                  {(user.profile?.full_name || user.email).charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
+                                <h4 className="font-black text-slate-800 truncate mb-1 text-base tracking-tight">{user.profile?.full_name || 'N/A'}</h4>
+                                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest py-0.5 px-2 bg-slate-50 text-slate-500 border-none rounded-lg">
+                                  {user.role === 'inspector' ? 'Inspector Engineer' : user.role.replace(/_/g, ' ')}
+                                </Badge>
                               </div>
-                            </TableCell>
-                            <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                            <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                            <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        filteredUsers.map((user) => (
-                          <TableRow
-                            key={user._id}
-                            className="hover:bg-muted/50"
-                          >
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <div className="relative">
-                                  <Avatar className="w-10 h-10">
-                                    <AvatarImage src={getFileUrl(user.profile?.avatar_url)} />
-                                    <AvatarFallback className="text-xs uppercase bg-accent">
-                                      {(user.profile?.full_name || user.email).charAt(0)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                </div>
-                                <div>
-                                  <p className="font-medium">{user.profile?.full_name || 'N/A'}</p>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <p className="text-sm">{user.email}</p>
-                            </TableCell>
-                            <TableCell>
-                              <p className="text-sm">{user.phoneNumber || user.profile?.phone || 'N/A'}</p>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="capitalize bg-muted text-white">
-                                {user.role === 'inspector' ? 'Inspector Engineer' : user.role.replace(/_/g, ' ')}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {new Date(user.createdAt).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                                {user.role !== 'master_admin' && (
-                                  <>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenEdit(user);
-                                      }}
-                                      className="text-primary"
-                                    >
-                                      <Pencil className="w-4 h-4" />
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
+                            </div>
+                            <div className={`w-3 h-3 rounded-full ${user.isActive ? 'bg-success' : 'bg-slate-200'} border-2 border-white shadow-sm shrink-0 mt-1.5`} />
+                          </div>
+
+                          <div className="space-y-3 pt-2 text-[11px] font-bold text-slate-600 flex-1">
+                            <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl group-hover:bg-white transition-colors border border-transparent group-hover:border-slate-100">
+                              <Mail className="w-4 h-4 text-primary/40" />
+                              <span className="truncate">{user.email}</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl group-hover:bg-white transition-colors border border-transparent group-hover:border-slate-100">
+                              <Smartphone className="w-4 h-4 text-primary/40" />
+                              <span>{user.phoneNumber || user.profile?.phone || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-center gap-3 px-3 py-1 text-muted-foreground/40 font-black uppercase tracking-tighter italic">
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+
+                          <div className="pt-4 flex items-center gap-3">
+                            <Button
+                              variant="outline"
+                              className="flex-1 rounded-2xl h-12 text-xs font-black tracking-tight hover:bg-primary hover:text-white border-slate-100 hover:border-primary transition-all shadow-sm hover:shadow-lg hover:shadow-primary/20"
+                              onClick={() => navigate(`/admin/members/${user._id}`)}
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              VIEW PROFILE
+                            </Button>
+                            {user.role !== 'master_admin' && (
+                              <Button
+                                variant="secondary"
+                                size="icon"
+                                className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-600 hover:bg-primary/10 hover:text-primary transition-all border-none"
+                                onClick={() => handleOpenEdit(user)}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

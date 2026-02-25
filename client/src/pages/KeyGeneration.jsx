@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +13,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
-import api from '@/lib/api';
+import api, { getFileUrl } from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
 import {
     Key,
     UserPlus,
@@ -24,9 +24,16 @@ import {
     Send,
     RefreshCw,
     Boxes,
+    ChevronLeft,
+    Mail,
+    Smartphone,
+    Lock,
+    User,
+    QrCode
 } from 'lucide-react';
 
 const KeyGeneration = () => {
+    const navigate = useNavigate();
     const { createUser, role } = useAuth();
     const [formData, setFormData] = useState({
         full_name: '',
@@ -79,10 +86,10 @@ const KeyGeneration = () => {
                     privateKey: result.data.privateKey,
                     userId: result.data.user.id
                 });
-                toast.success('Secret key generated successfully!');
+                toast.success('Member created successfully!');
             }
         } catch (error) {
-            toast.error('Failed to generate key');
+            toast.error(error.response?.data?.message || 'Failed to create member');
         } finally {
             setIsGenerating(false);
         }
@@ -103,11 +110,14 @@ const KeyGeneration = () => {
     const handleCopyAllDetails = () => {
         if (generatedData) {
             const details = `
-Welcome to InspectIQ! 
+Welcome to InspectIQ! 🚀
 
-Login Email: ${generatedData.email}
-Password: ${generatedData.password || generatedData.privateKey}
-Role: ${generatedData.role.replace('_', ' ').toUpperCase()}
+👤 Name: ${generatedData.full_name}
+📧 Login Email: ${generatedData.email}
+🔑 Password: ${generatedData.password || generatedData.privateKey}
+🛡️ Role: ${generatedData.role.replace('_', ' ').toUpperCase()}
+
+Please login at your company portal.
             `.trim();
             navigator.clipboard.writeText(details);
             toast.success('Login details copied!');
@@ -119,7 +129,8 @@ Role: ${generatedData.role.replace('_', ' ').toUpperCase()}
             const message = `
 *Welcome to InspectIQ!* 🚀
 
- Your account is ready:
+Hello *${generatedData.full_name}*, your team account is ready:
+
 📧 *Email:* ${generatedData.email}
 🔑 *Password:* ${generatedData.password || generatedData.privateKey}
 👤 *Role:* ${generatedData.role.replace('_', ' ').toUpperCase()}
@@ -135,12 +146,17 @@ Please keep these credentials secure.
 
     if (role !== 'master_admin') {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Card className="w-96">
-                    <CardContent className="pt-6 text-center">
-                        <Key className="w-16 h-16 mx-auto text-destructive mb-4" />
-                        <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-                        <p className="text-muted-foreground">You need Master Admin privileges to access this page.</p>
+            <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+                <Card className="w-full max-w-md border-none shadow-premium rounded-[32px] overflow-hidden">
+                    <CardContent className="pt-12 pb-12 text-center space-y-4">
+                        <div className="w-20 h-20 bg-destructive/10 rounded-[24px] flex items-center justify-center mx-auto text-destructive">
+                            <Shield className="w-10 h-10" />
+                        </div>
+                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Access Denied</h2>
+                        <p className="text-muted-foreground font-medium">You need Master Admin privileges to onboard new members.</p>
+                        <Button variant="outline" className="rounded-2xl h-12 px-8" onClick={() => navigate(-1)}>
+                            Go Back
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
@@ -148,229 +164,285 @@ Please keep these credentials secure.
     }
 
     return (
-        <div className="min-h-screen">
-            <Header
-                title="Create Member"
-                subtitle="Generate secure login credentials for new team members"
-            />
-
-            <div className="p-6 max-w-4xl mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Key Generation Form */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <UserPlus className="w-5 h-5 text-primary" />
-                                Member Details
-                            </CardTitle>
-                            <CardDescription>
-                                Fill in the details to create a new member account
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={handleGenerateKey} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="full_name">Full Name *</Label>
-                                    <Input
-                                        id="full_name"
-                                        placeholder="Enter full name"
-                                        value={formData.full_name}
-                                        onChange={(e) => handleInputChange('full_name', e.target.value)}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email Address *</Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="email@company.com"
-                                        value={formData.email}
-                                        onChange={(e) => handleInputChange('email', e.target.value)}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="phoneNumber">WhatsApp Number</Label>
-                                    <Input
-                                        id="phoneNumber"
-                                        type="tel"
-                                        placeholder="+91 XXXXX XXXXX"
-                                        value={formData.phoneNumber}
-                                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="password">Initial Password (Optional)</Label>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        placeholder="Leave blank to use Secret Key"
-                                        value={formData.password}
-                                        onChange={(e) => handleInputChange('password', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="role">Role Assignment *</Label>
-                                    <Select
-                                        value={formData.role}
-                                        onValueChange={(val) => handleInputChange('role', val)}
-                                    >
-                                        <SelectTrigger id="role">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="service_manager">Service Manager</SelectItem>
-                                            <SelectItem value="inspection_coordinator">Inspection Coordinator</SelectItem>
-                                            <SelectItem value="technical_coordinator">Technical Coordinator</SelectItem>
-                                            <SelectItem value="inspector">Inspector Engineer</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-3 pt-2">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Boxes className="w-4 h-4 text-primary" />
-                                        <Label className="text-sm font-semibold">Assign Services (Quality Modules)</Label>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-muted/30 rounded-2xl border border-dashed">
-                                        {availableServices.map((service) => (
-                                            <div key={service._id} className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id={service._id}
-                                                    checked={formData.assignedServices?.includes(service._id)}
-                                                    onCheckedChange={() => handleServiceToggle(service._id)}
-                                                    className="rounded-[6px]"
-                                                />
-                                                <label
-                                                    htmlFor={service._id}
-                                                    className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                                >
-                                                    {service.name}
-                                                </label>
-                                            </div>
-                                        ))}
-                                        {availableServices.length === 0 && (
-                                            <p className="text-[10px] text-muted-foreground col-span-full text-center">No active services found</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <Button
-                                    type="submit"
-                                    className="w-full"
-                                    disabled={isGenerating}
-                                    variant="hero"
-                                >
-                                    {isGenerating ? (
-                                        <>
-                                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                                            Creating Member...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <UserPlus className="mr-2 h-4 w-4" />
-                                            Create Account
-                                        </>
-                                    )}
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
-
-                    {/* Member Details Display */}
-                    <Card className={generatedData ? 'border-primary' : ''}>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Shield className="w-5 h-5 text-primary" />
-                                Login Credentials
-                            </CardTitle>
-                            <CardDescription>
-                                {generatedData
-                                    ? 'Share these login details with the member'
-                                    : 'Credentials will appear here after creation'}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {generatedData ? (
-                                <div className="space-y-5">
-                                    <div className="bg-success/10 border border-success/20 rounded-lg p-4 text-center">
-                                        <CheckCircle className="w-10 h-10 mx-auto text-success mb-2" />
-                                        <p className="text-sm font-semibold text-success uppercase tracking-wider">Account Created!</p>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1">
-                                                <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Login Email</Label>
-                                                <p className="font-semibold text-sm truncate">{generatedData.email}</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Password</Label>
-                                                <p className="font-semibold text-sm truncate">{generatedData.password || generatedData.privateKey}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-1">
-                                            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Full Name</Label>
-                                            <p className="font-medium text-sm">{generatedData.full_name}</p>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1">
-                                                <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Role</Label>
-                                                <p className="font-medium text-sm capitalize">{generatedData.role.replace('_', ' ')}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3 pt-2">
-                                        <Button
-                                            className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white flex items-center justify-center gap-2"
-                                            onClick={handleWhatsAppShare}
-                                            disabled={!generatedData.phoneNumber}
-                                        >
-                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                                            </svg>
-                                            Share on WhatsApp
-                                        </Button>
-
-                                        <div className="flex gap-2">
-                                            <Button
-                                                variant="outline"
-                                                className="flex-1"
-                                                onClick={handleCopyAllDetails}
-                                            >
-                                                <Copy className="w-4 h-4 mr-2" />
-                                                Copy Details
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                className="flex-1"
-                                                onClick={handleReset}
-                                            >
-                                                <RefreshCw className="w-4 h-4 mr-2" />
-                                                New Creation
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 text-muted-foreground opacity-30">
-                                    <Shield className="w-20 h-20 mx-auto mb-4" />
-                                    <p className="text-sm font-medium">Account details will be<br />displayed here</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+        <div className="min-h-screen bg-slate-50/50 pb-12">
+            {/* Custom Header with Back Button */}
+            <div className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-slate-100 p-4 sm:p-6 mb-6 sm:mb-8">
+                <div className="max-w-6xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-4 sm:gap-6">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(-1)}
+                            className="rounded-2xl h-10 w-10 sm:h-12 sm:w-12 bg-white shadow-sm border border-slate-100 hover:bg-slate-50"
+                        >
+                            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </Button>
+                        <div>
+                            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-800">Onboard Member</h1>
+                            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest mt-0.5">TEAM ACCESS MANAGEMENT</p>
+                        </div>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-2xl border border-primary/10">
+                        <Shield className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-black text-primary uppercase tracking-wider">Super Admin Node</span>
+                    </div>
                 </div>
-
             </div>
+
+            <main className="px-4 sm:px-6 max-w-5xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+                    {/* Form Section */}
+                    <div className="lg:col-span-7 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
+                        <Card className="border-none shadow-premium rounded-[32px] overflow-hidden">
+                            <div className="bg-gradient-to-r from-slate-800 to-slate-700 p-6 sm:p-8">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white">
+                                        <UserPlus className="w-6 h-6" />
+                                    </div>
+                                    <div className="text-white">
+                                        <CardTitle className="text-xl font-black tracking-tight">Member Identity</CardTitle>
+                                        <CardDescription className="text-slate-300 font-medium text-xs">Fill in official details for system registration</CardDescription>
+                                    </div>
+                                </div>
+                            </div>
+                            <CardContent className="p-6 sm:p-8 space-y-6">
+                                <form onSubmit={handleGenerateKey} className="space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div className="space-y-2 group">
+                                            <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2 ml-1">
+                                                <User className="w-3.5 h-3.5 text-primary/40 group-focus-within:text-primary transition-colors" />
+                                                Full Name
+                                            </Label>
+                                            <Input
+                                                placeholder="John Doe"
+                                                className="h-12 sm:h-14 rounded-2xl bg-slate-50/50 border-slate-100 font-bold focus:bg-white focus:ring-primary/20 transition-all px-4"
+                                                value={formData.full_name}
+                                                onChange={(e) => handleInputChange('full_name', e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-2 group">
+                                            <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2 ml-1">
+                                                <Mail className="w-3.5 h-3.5 text-primary/40 group-focus-within:text-primary transition-colors" />
+                                                Email Address
+                                            </Label>
+                                            <Input
+                                                type="email"
+                                                placeholder="email@company.com"
+                                                className="h-12 sm:h-14 rounded-2xl bg-slate-50/50 border-slate-100 font-bold focus:bg-white focus:ring-primary/20 transition-all px-4"
+                                                value={formData.email}
+                                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div className="space-y-2 group">
+                                            <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2 ml-1">
+                                                <Smartphone className="w-3.5 h-3.5 text-primary/40 group-focus-within:text-primary transition-colors" />
+                                                WhatsApp Number
+                                            </Label>
+                                            <Input
+                                                type="tel"
+                                                placeholder="+91 XXXXX XXXXX"
+                                                className="h-12 sm:h-14 rounded-2xl bg-slate-50/50 border-slate-100 font-bold focus:bg-white focus:ring-primary/20 transition-all px-4"
+                                                value={formData.phoneNumber}
+                                                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2 group">
+                                            <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2 ml-1">
+                                                <Lock className="w-3.5 h-3.5 text-primary/40 group-focus-within:text-primary transition-colors" />
+                                                Set Password
+                                            </Label>
+                                            <Input
+                                                type="password"
+                                                placeholder="Leave empty for auto-key"
+                                                className="h-12 sm:h-14 rounded-2xl bg-slate-50/50 border-slate-100 font-bold focus:bg-white focus:ring-primary/20 transition-all px-4"
+                                                value={formData.password}
+                                                onChange={(e) => handleInputChange('password', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2 group">
+                                        <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2 ml-1">
+                                            <Shield className="w-3.5 h-3.5 text-primary/40 group-focus-within:text-primary transition-colors" />
+                                            System Role
+                                        </Label>
+                                        <Select
+                                            value={formData.role}
+                                            onValueChange={(val) => handleInputChange('role', val)}
+                                        >
+                                            <SelectTrigger className="h-12 sm:h-14 rounded-2xl bg-slate-50/50 border-slate-100 font-bold px-4">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-2">
+                                                <SelectItem value="service_manager" className="rounded-xl font-bold py-3 px-4">Service Manager</SelectItem>
+                                                <SelectItem value="inspection_coordinator" className="rounded-xl font-bold py-3 px-4">Inspection Coordinator</SelectItem>
+                                                <SelectItem value="technical_coordinator" className="rounded-xl font-bold py-3 px-4">Technical Coordinator</SelectItem>
+                                                <SelectItem value="inspector" className="rounded-xl font-bold py-3 px-4">Inspector Engineer</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-4 pt-4 border-t border-slate-100">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                                    <Boxes className="w-4 h-4" />
+                                                </div>
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-700">Service Permissions</Label>
+                                            </div>
+                                            <span className="text-[10px] font-bold text-muted-foreground/60">SELECT ALL THAT APPLY</span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5 bg-slate-50/50 rounded-[24px] border border-dashed border-slate-200">
+                                            {availableServices.map((service) => (
+                                                <div key={service._id} className="flex items-center space-x-3 bg-white p-3 rounded-xl border border-slate-100 hover:border-primary/20 transition-all">
+                                                    <Checkbox
+                                                        id={service._id}
+                                                        checked={formData.assignedServices?.includes(service._id)}
+                                                        onCheckedChange={() => handleServiceToggle(service._id)}
+                                                        className="h-5 w-5 rounded-[6px]"
+                                                    />
+                                                    <label
+                                                        htmlFor={service._id}
+                                                        className="text-xs font-bold text-slate-700 cursor-pointer select-none leading-tight"
+                                                    >
+                                                        {service.name}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                            {availableServices.length === 0 && (
+                                                <p className="text-[10px] text-muted-foreground col-span-full text-center py-4 font-bold uppercase tracking-widest">No quality modules active</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        className="h-14 sm:h-16 w-full rounded-[24px] shadow-lg shadow-black/10 text-base font-black tracking-tight"
+                                        disabled={isGenerating}
+                                        variant="hero"
+                                    >
+                                        {isGenerating ? (
+                                            <>
+                                                <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
+                                                VERIFYING & CREATING...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <UserPlus className="mr-2 h-5 w-5" />
+                                                INITIALIZE MEMBER ACCOUNT
+                                            </>
+                                        )}
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Output Section */}
+                    <div className="lg:col-span-5 animate-in fade-in slide-in-from-right-8 duration-700 delay-100 fill-mode-both">
+                        <Card className={`border-none shadow-premium rounded-[32px] overflow-hidden transition-all duration-500 ${generatedData ? 'ring-2 ring-primary bg-white' : 'bg-slate-100/50 border-2 border-dashed border-slate-200 shadow-none'}`}>
+                            <div className={`p-6 sm:p-8 flex items-center justify-between ${generatedData ? 'bg-primary/5 border-b border-primary/10' : ''}`}>
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${generatedData ? 'bg-primary text-white' : 'bg-slate-200 text-slate-400'}`}>
+                                        <Shield className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-black tracking-tight">Security Node</CardTitle>
+                                        <CardDescription className="text-[11px] font-bold uppercase tracking-widest">Access Credentials</CardDescription>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <CardContent className="p-6 sm:p-8 min-h-[400px] flex flex-col justify-center">
+                                {generatedData ? (
+                                    <div className="space-y-8 animate-in zoom-in duration-500">
+                                        <div className="flex flex-col items-center gap-4 py-4">
+                                            <div className="w-20 h-20 bg-success/10 rounded-[32px] flex items-center justify-center text-success border-2 border-success/20 shadow-lg shadow-success/10">
+                                                <CheckCircle className="w-10 h-10" />
+                                            </div>
+                                            <div className="text-center">
+                                                <h3 className="text-xl font-black text-slate-800 tracking-tight">Onboarding Complete</h3>
+                                                <p className="text-xs font-bold text-success uppercase tracking-widest mt-1">Credentials initialized</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 p-6 bg-slate-50 rounded-[28px] border border-slate-100 relative group overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <QrCode className="w-16 h-16 text-slate-800" />
+                                            </div>
+
+                                            <div className="grid grid-cols-1 gap-6 relative z-10">
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest ml-1">Portal User ID</Label>
+                                                    <div className="p-4 bg-white rounded-xl border border-slate-100 font-bold text-sm shadow-sm">{generatedData.email}</div>
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest ml-1">Secure Passkey</Label>
+                                                    <div className="p-4 bg-white rounded-xl border border-primary/20 font-mono font-black text-primary text-lg tracking-wider shadow-sm flex justify-between items-center group/key">
+                                                        <span className="truncate">{generatedData.password || generatedData.privateKey}</span>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg group-hover/key:bg-primary/10 transition-colors" onClick={() => {
+                                                            navigator.clipboard.writeText(generatedData.password || generatedData.privateKey);
+                                                            toast.success('Passkey copied!');
+                                                        }}>
+                                                            <Copy className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col gap-3">
+                                            <Button
+                                                className="h-14 w-full bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-2xl flex items-center justify-center gap-3 font-black shadow-lg shadow-[#25D366]/20 transition-all hover:scale-[1.02] active:scale-95"
+                                                onClick={handleWhatsAppShare}
+                                                disabled={!generatedData.phoneNumber}
+                                            >
+                                                <Send className="w-5 h-5" />
+                                                SHARE ON WHATSAPP
+                                            </Button>
+
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <Button
+                                                    variant="outline"
+                                                    className="h-14 rounded-2xl font-black border-2 border-slate-100 hover:border-primary/20"
+                                                    onClick={handleCopyAllDetails}
+                                                >
+                                                    <Copy className="w-4 h-4 mr-2" />
+                                                    COPY ALL
+                                                </Button>
+                                                <Button
+                                                    variant="secondary"
+                                                    className="h-14 rounded-2xl font-black bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                                    onClick={handleReset}
+                                                >
+                                                    <RefreshCw className="w-4 h-4 mr-2" />
+                                                    NEW ENTRY
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center space-y-4 opacity-30 group">
+                                        <div className="w-24 h-24 bg-slate-200 rounded-[40px] flex items-center justify-center mx-auto text-slate-400 group-hover:scale-110 transition-transform duration-500">
+                                            <Lock className="w-10 h-10" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-black text-slate-800 tracking-tight">ENCRYPTED NODE</p>
+                                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Waiting for identity data...</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 };

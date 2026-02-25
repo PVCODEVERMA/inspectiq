@@ -88,4 +88,28 @@ exports.updateUser = async (req, res) => {
     }
 };
 
+exports.getUserById = async (req, res) => {
+    try {
+        console.log(`[AdminAPI] Fetching member profile for ID: ${req.params.id}`);
+        const user = await User.findById(req.params.id).select('-privateKey').populate('assignedServices', 'name');
+
+        if (!user) {
+            console.warn(`[AdminAPI] Member not found: ${req.params.id}`);
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const profile = await Profile.findOne({ user: user._id });
+        const userData = user.toObject();
+
+        console.log(`[AdminAPI] Profile found for: ${user.email}`);
+        res.json({
+            ...userData,
+            profile
+        });
+    } catch (error) {
+        console.error(`[AdminAPI] Error fetching member ${req.params.id}:`, error.message);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
