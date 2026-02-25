@@ -7,11 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Camera, Mail, Shield, User, Smartphone, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Camera, Mail, Shield, User, Smartphone, Loader2, UserPlus, Users } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getFileUrl } from '@/lib/utils';
 
 const ProfilePage = () => {
+    const navigate = useNavigate();
     const { user, profile, updateAvatar } = useAuth();
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -117,10 +119,10 @@ const ProfilePage = () => {
                             </div>
 
                             <div className="pt-4 border-t border-border">
-                                <div className="bg-accent/10 rounded-xl p-4 flex items-start gap-3">
-                                    <Shield className="w-5 h-5 text-accent mt-0.5" />
+                                <div className="bg-primary/5 rounded-xl p-4 flex items-start gap-3 border border-primary/10">
+                                    <Shield className="w-5 h-5 text-primary mt-0.5" />
                                     <div>
-                                        <h4 className="text-sm font-semibold">Security Note</h4>
+                                        <h4 className="text-sm font-semibold text-primary">Security Note</h4>
                                         <p className="text-xs text-muted-foreground mt-1">
                                             Your 10-digit private key is your unique identifier. Do not share it with anyone.
                                             If you believe your account is compromised, contact the Master Admin immediately.
@@ -128,6 +130,36 @@ const ProfilePage = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {(user?.role === 'master_admin' || user?.role === 'super_admin') && (
+                                <div className="pt-6 border-t border-border space-y-4">
+                                    <h3 className="font-display font-semibold text-lg flex items-center gap-2">
+                                        <Users className="w-5 h-5 text-primary" /> Member Management
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <Button
+                                            variant="outline"
+                                            className="h-20 rounded-2xl border-2 border-dashed hover:border-primary hover:bg-primary/5 group transition-all"
+                                            onClick={() => navigate('/members/new')}
+                                        >
+                                            <div className="flex flex-col items-center gap-1">
+                                                <UserPlus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                <span className="font-bold">Create Member</span>
+                                            </div>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="h-20 rounded-2xl border-2 border-dashed hover:border-primary hover:bg-primary/5 group transition-all"
+                                            onClick={() => navigate('/inspectors')}
+                                        >
+                                            <div className="flex flex-col items-center gap-1">
+                                                <Users className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                <span className="font-bold">Member Details</span>
+                                            </div>
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

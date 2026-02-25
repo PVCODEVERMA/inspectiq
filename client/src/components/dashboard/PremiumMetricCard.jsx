@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { ArrowUp, ArrowDown } from 'lucide-react';
+import CountUp from 'react-countup';
 
 export const PremiumMetricCard = ({
     label,
@@ -10,8 +11,24 @@ export const PremiumMetricCard = ({
     icon: Icon,
     variant = 'red',
     className
-
 }) => {
+    // Helper to parse numeric part, prefix and suffix from the value string
+    const parseValue = (val) => {
+        if (typeof val === 'number') return { prefix: '', number: val, suffix: '' };
+
+        const match = val.match(/^([^0-9.]*)([0-9.]+)(.*)$/);
+        if (match) {
+            return {
+                prefix: match[1] || '',
+                number: parseFloat(match[2]),
+                suffix: match[3] || ''
+            };
+        }
+        return { prefix: '', number: 0, suffix: val };
+    };
+
+    const { prefix, number, suffix } = parseValue(value);
+
     const variants = {
         red: {
             bg: 'bg-[#FFF1F1]',
@@ -54,7 +71,15 @@ export const PremiumMetricCard = ({
 
                 <div className="space-y-1">
                     <h3 className="text-xl lg:text-4xl font-extrabold text-slate-900 tracking-tighter">
-                        {value}
+                        <CountUp
+                            start={0}
+                            end={number}
+                            duration={1.5}
+                            decimals={number % 1 !== 0 ? 1 : 0}
+                            prefix={prefix}
+                            suffix={suffix}
+                            useEasing={true}
+                        />
                     </h3>
 
                     <div className="flex items-center gap-1.5 pt-1">
@@ -73,7 +98,6 @@ export const PremiumMetricCard = ({
                     </div>
                 </div>
             </div>
-
 
             <div className={cn(
                 "p-2 lg:p-4 rounded-xl lg:rounded-3xl shadow-lg ring-2 lg:ring-4 ring-white/50 flex items-center justify-center text-white shrink-0",

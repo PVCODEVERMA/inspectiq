@@ -85,7 +85,7 @@ const CompaniesPage = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {demoCompanies.reduce((acc, c) => acc + c.inspectorsCount, 0)}
+                  {allCompanies.reduce((acc, c) => acc + (c.inspectorsCount || 0), 0)}
                 </p>
                 <p className="text-muted-foreground text-sm">Total Inspectors</p>
               </div>
@@ -98,7 +98,7 @@ const CompaniesPage = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {demoCompanies.reduce((acc, c) => acc + c.inspectionsCount, 0)}
+                  {allCompanies.reduce((acc, c) => acc + (c.inspectionsCount || 0), 0)}
                 </p>
                 <p className="text-muted-foreground text-sm">Total Inspections</p>
               </div>

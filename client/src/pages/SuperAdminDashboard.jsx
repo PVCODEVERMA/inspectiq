@@ -56,6 +56,7 @@ import {
   User,
   Boxes,
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const SuperAdminDashboard = () => {
   const navigate = useNavigate();
@@ -232,7 +233,9 @@ const SuperAdminDashboard = () => {
                     <stat.icon className={`w-5 h-5 ${stat.color}`} />
                   </div>
                   <div>
-                    <p className="text-xl font-bold leading-none">{isLoading ? '...' : stat.value || 0}</p>
+                    <p className="text-xl font-bold leading-none">
+                      {isLoading ? <Skeleton className="h-5 w-8 mx-auto" /> : stat.value || 0}
+                    </p>
                     <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight mt-1">{stat.label}</p>
                   </div>
                 </div>
@@ -278,11 +281,21 @@ const SuperAdminDashboard = () => {
                     </TableHeader>
                     <TableBody>
                       {isLoading ? (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8">
-                            <RefreshCw className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
-                          </TableCell>
-                        </TableRow>
+                        [1, 2, 3, 4, 5].map(i => (
+                          <TableRow key={`user-skeleton-${i}`}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Skeleton className="w-10 h-10 rounded-full" />
+                                <Skeleton className="h-4 w-32" />
+                              </div>
+                            </TableCell>
+                            <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                            <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                          </TableRow>
+                        ))
                       ) : (
                         filteredUsers.map((user) => (
                           <TableRow

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { cn, getFileUrl } from '@/lib/utils';
@@ -23,13 +23,16 @@ import {
   LogOut,
   User,
   Menu,
+  Plus,
+  XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 
 export const Header = ({ title, shortTitle, subtitle }) => {
   const { profile, signOut, role } = useAuth();
-  const { toggleMobileSidebar } = useSidebar();
+  const { toggleMobileSidebar, isSearchOpen, searchQuery, setSearchQuery } = useSidebar();
+  const navigate = useNavigate();
 
   const userName = profile?.full_name || profile?.email || 'User';
   const userInitial = userName.charAt(0).toUpperCase();
@@ -37,19 +40,11 @@ export const Header = ({ title, shortTitle, subtitle }) => {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-4 bg-primary backdrop-blur-xl border-b border-border shadow-sm">
       <div className="flex items-center gap-4 min-w-0 flex-1 mr-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleMobileSidebar}
-          className="lg:hidden text-white hover:text-foreground hover:bg-muted/50 transition-colors p-4"
-        >
-          <Menu className="w-6 h-6 text-white" />
-        </Button>
 
-        <div className="flex flex-col min-w-0">
+        <div className={cn("flex flex-col min-w-0 transition-opacity duration-200", isSearchOpen ? "hidden sm:flex" : "flex")}>
           <h1 className="text-lg font-bold text-white truncate leading-tight mt-1">
             <span className="sm:hidden">{shortTitle || title || 'InspectIQ'}</span>
-            <span className="hidden sm:inline">{title  || 'Dashboard'}</span>
+            <span className="hidden sm:inline">{title || 'Dashboard'}</span>
           </h1>
           {subtitle && (
             <p className="text-xs text-white/80 truncate hidden md:block">
@@ -57,16 +52,59 @@ export const Header = ({ title, shortTitle, subtitle }) => {
             </p>
           )}
         </div>
+
+        {/* Mobile Search Overlay */}
+        <div className={cn(
+          "flex-1 animate-in slide-in-from-top-2 duration-300 sm:hidden",
+          !isSearchOpen && "hidden"
+        )}>
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+            <Input
+              autoFocus
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 h-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/40 rounded-full"
+            />
+            {searchQuery && (
+              <XCircle
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 cursor-pointer hover:text-white"
+                onClick={() => setSearchQuery('')}
+              />
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 rounded-full">
+        {/* Quick New (Desktop) */}
+        {role !== 'inspector' && (
+          <Button
+            size="sm"
+            className="hidden md:flex bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-full h-10 px-4 gap-2 font-bold transition-all hover:scale-105 active:scale-95"
+            onClick={() => navigate('/inspections/new')}
+          >
+            <Plus className="w-4 h-4" />
+            New
+          </Button>
+        )}
+
         {/* Search */}
         <div className="relative hidden md:block ">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground cursor-pointer" />
           <Input
             placeholder="Search inspections, vendors..."
-            className="w-64 pl-10 bg-secondary border-transparent focus:border-primary/50"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-64 pl-10 pr-10 bg-secondary border-transparent focus:border-primary/50"
           />
+          {searchQuery && (
+            <XCircle
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary"
+              onClick={() => setSearchQuery('')}
+            />
+          )}
         </div>
 
         {/* Notifications */}

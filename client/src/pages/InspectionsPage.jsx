@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
+import Fuse from 'fuse.js';
 import { InspectionTable } from '@/components/dashboard/InspectionTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +23,7 @@ import {
 import { InspectionTypeSelector } from '@/components/inspections/InspectionTypeSelector';
 import api from '@/lib/api';
 import { toast } from 'react-hot-toast';
+import { useSidebar } from '@/contexts/SidebarContext';
 
 const InspectionsPage = () => {
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ const InspectionsPage = () => {
   const isNewInspection = location.pathname === '/inspections/new';
   const [inspections, setInspections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { searchQuery, setSearchQuery } = useSidebar();
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
 
@@ -49,17 +51,30 @@ const InspectionsPage = () => {
     fetchInspections();
   }, []);
 
-  const filteredInspections = inspections.filter((inspection) => {
-    const matchesSearch =
-      (inspection.report_no || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (inspection.client_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (inspection.vendor_name || "").toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredInspections = React.useMemo(() => {
+    let result = inspections;
 
-    const matchesStatus = statusFilter === 'all' || inspection.status === statusFilter;
-    const matchesType = typeFilter === 'all' || inspection.inspection_type === typeFilter;
+    // Status Filter
+    if (statusFilter !== 'all') {
+      result = result.filter(i => i.status === statusFilter);
+    }
 
-    return matchesSearch && matchesStatus && matchesType;
-  });
+    // Type Filter
+    if (typeFilter !== 'all') {
+      result = result.filter(i => i.inspection_type === typeFilter);
+    }
+
+    // Search Query (Fuzzy Search with Fuse.js)
+    if (searchQuery.trim()) {
+      const fuse = new Fuse(result, {
+        keys: ['report_no', 'client_name', 'vendor_name', 'project_name'],
+        threshold: 0.3
+      });
+      result = fuse.search(searchQuery).map(res => res.item);
+    }
+
+    return result;
+  }, [inspections, statusFilter, typeFilter, searchQuery]);
 
   const statusCounts = {
     all: inspections.length,

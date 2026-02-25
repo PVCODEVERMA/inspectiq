@@ -98,7 +98,7 @@ export const AddInspectorDialog = ({
                   <SelectValue placeholder="Select a company" />
                 </SelectTrigger>
                 <SelectContent>
-                  {demoCompanies.map((company) => (
+                  {companies.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
                     </SelectItem>

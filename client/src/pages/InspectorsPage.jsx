@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Header } from '@/components/layout/Header';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSidebar } from '@/contexts/SidebarContext';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -24,22 +27,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AddInspectorDialog } from '@/components/dialogs/AddInspectorDialog';
 
 const allUsers = [];
 const allCompanies = [];
 const allInspections = [];
 
 const InspectorsPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { searchQuery } = useSidebar();
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const inspectors = allUsers.filter(u => u.role === 'inspector');
 
-  const filteredInspectors = inspectors.filter(inspector =>
-    inspector.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inspector.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredInspectors = inspectors.filter(inspector => {
+    const matchesSearch = inspector.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inspector.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' ||
+      (statusFilter === 'completed' ? (inspector.status === 'completed' || inspector.status === 'approved') : inspector.status === statusFilter);
+    return matchesSearch && matchesStatus;
+  });
 
   const getCompanyName = (companyId) => {
     if (!companyId) return 'N/A';
@@ -68,70 +75,86 @@ const InspectorsPage = () => {
       />
 
       <div className="p-6 space-y-6">
-        {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder="Search inspectors..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button variant="hero" onClick={() => setAddDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
+        {/* Actions Bar - Simplified to just Add Button as Search is in Header */}
+        <div className="flex justify-end">
+          <Button variant="hero" onClick={() => navigate('/members/new')} className="rounded-2xl h-12 px-6">
+            <Plus className="w-5 h-5 mr-2" />
             Add Inspector
           </Button>
         </div>
 
-        <AddInspectorDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
+        {/* Stats Cards - 2x2 Grid */}
+        <div className="grid grid-cols-2 gap-4 sm:gap-6">
+          <div
+            className={cn(
+              "glass-card rounded-2xl p-4 sm:p-6 cursor-pointer transition-all border-2",
+              statusFilter === 'all' ? "border-primary bg-primary/5 ring-4 ring-primary/10 shadow-glow" : "border-transparent"
+            )}
+            onClick={() => setStatusFilter('all')}
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-black truncate">{inspectors.length}</p>
+                <p className="text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-wider">Total</p>
+              </div>
+            </div>
+          </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary-foreground" />
+          <div
+            className={cn(
+              "glass-card rounded-2xl p-4 sm:p-6 cursor-pointer transition-all border-2",
+              statusFilter === 'active' ? "border-success bg-success/5 ring-4 ring-success/10" : "border-transparent"
+            )}
+            onClick={() => setStatusFilter('active')}
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl gradient-success flex items-center justify-center shrink-0">
+                <UserCheck className="w-5 h-5 sm:w-6 sm:h-6 text-success-foreground" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{inspectors.length}</p>
-                <p className="text-muted-foreground text-sm">Total Inspectors</p>
-              </div>
-            </div>
-          </div>
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl gradient-success flex items-center justify-center">
-                <UserCheck className="w-6 h-6 text-success-foreground" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{activeInspectors}</p>
-                <p className="text-muted-foreground text-sm">Active</p>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-black truncate">{activeInspectors}</p>
+                <p className="text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-wider">Active</p>
               </div>
             </div>
           </div>
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl gradient-warning flex items-center justify-center">
-                <UserX className="w-6 h-6 text-warning-foreground" />
+
+          <div
+            className={cn(
+              "glass-card rounded-2xl p-4 sm:p-6 cursor-pointer transition-all border-2",
+              statusFilter === 'suspended' ? "border-warning bg-warning/5 ring-4 ring-warning/10" : "border-transparent"
+            )}
+            onClick={() => setStatusFilter('suspended')}
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl gradient-warning flex items-center justify-center shrink-0">
+                <UserX className="w-5 h-5 sm:w-6 sm:h-6 text-warning-foreground" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{suspendedInspectors}</p>
-                <p className="text-muted-foreground text-sm">Suspended</p>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-black truncate">{suspendedInspectors}</p>
+                <p className="text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-wider">Suspended</p>
               </div>
             </div>
           </div>
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl gradient-accent flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-accent-foreground" />
+
+          <div
+            className={cn(
+              "glass-card rounded-2xl p-4 sm:p-6 cursor-pointer transition-all border-2",
+              statusFilter === 'completed' ? "border-accent bg-accent/5 ring-4 ring-accent/10 shadow-glow-red" : "border-transparent"
+            )}
+            onClick={() => setStatusFilter('completed')}
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl gradient-accent flex items-center justify-center shrink-0">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-accent-foreground" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">
-                  {demoInspections.filter(i => i.status === 'completed' || i.status === 'approved').length}
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-black truncate">
+                  {allInspections.filter(i => i.status === 'completed' || i.status === 'approved').length}
                 </p>
-                <p className="text-muted-foreground text-sm">Completed Tasks</p>
+                <p className="text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-wider">Done</p>
               </div>
             </div>
           </div>

@@ -36,11 +36,11 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'react-hot-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ClientManagement = () => {
-    const [clients, setClients] = useState([]);
+    const { searchQuery, setSearchQuery } = useSidebar();
     const [isLoading, setIsLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingClient, setEditingClient] = useState(null);
@@ -141,11 +141,14 @@ const ClientManagement = () => {
         }
     };
 
-    const filteredClients = clients.filter(client =>
-        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.contact_person?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredClients = React.useMemo(() => {
+        if (!searchQuery.trim()) return clients;
+        const fuse = new Fuse(clients, {
+            keys: ['name', 'contact_person', 'email', 'phone', 'location'],
+            threshold: 0.3
+        });
+        return fuse.search(searchQuery).map(result => result.item);
+    }, [clients, searchQuery]);
 
     return (
         <div className="min-h-screen bg-background pb-12">
@@ -161,8 +164,8 @@ const ClientManagement = () => {
                         <Input
                             placeholder="Search clients..."
                             className="pl-9 rounded-xl"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                     <Button onClick={() => handleOpenDialog()} className="rounded-xl shadow-lg shadow-primary/20">
@@ -172,8 +175,32 @@ const ClientManagement = () => {
                 </div>
 
                 {isLoading ? (
-                    <div className="flex justify-center py-12">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                            <Card key={`client-skeleton-${i}`} className="border-none shadow-sm rounded-2xl overflow-hidden">
+                                <CardHeader className="bg-muted/30 pb-4">
+                                    <div className="flex justify-between items-start">
+                                        <Skeleton className="w-11 h-11 rounded-xl" />
+                                    </div>
+                                    <Skeleton className="h-6 w-3/4 mt-4" />
+                                    <Skeleton className="h-3 w-1/3 mt-2" />
+                                </CardHeader>
+                                <CardContent className="pt-4 space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <Skeleton className="w-4 h-4 rounded-full" />
+                                        <Skeleton className="h-4 flex-1" />
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Skeleton className="w-4 h-4 rounded-full" />
+                                        <Skeleton className="h-4 w-1/2" />
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Skeleton className="w-4 h-4 rounded-full" />
+                                        <Skeleton className="h-4 w-2/3" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
