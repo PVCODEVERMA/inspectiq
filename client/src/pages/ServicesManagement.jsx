@@ -82,17 +82,18 @@ const ServicesManagement = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-bottom-5 duration-500">
                         {filteredServices.length > 0 ? (
-                            filteredServices.map((service) => (
+                            filteredServices.map((service, idx) => (
                                 <Link
                                     key={service._id}
                                     to={`/admin/services/${service._id}/${getServiceType(service.name)}`}
-                                    className="group flex items-center justify-between p-5 bg-card hover:bg-primary/5 border rounded-2xl transition-all hover:scale-[1.01] hover:shadow-md"
+                                    className="group flex items-center justify-between p-5 bg-card hover:bg-primary/5 border rounded-2xl transition-all hover:scale-[1.01] hover:shadow-md animate-in fade-in slide-in-from-left-4 fill-mode-both"
+                                    style={{ animationDelay: `${idx * 50}ms` }}
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                        <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
                                             <Boxes className="w-5 h-5" />
                                         </div>
-                                        <span className="text-lg font-bold text-slate-700">{service.name}</span>
+                                        <span className="text-lg font-bold text-slate-700 tracking-tight">{service.name}</span>
                                     </div>
                                     <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                                 </Link>

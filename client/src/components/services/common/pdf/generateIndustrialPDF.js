@@ -104,12 +104,13 @@ const drawStandardTemplate = (doc, pageNumber, totalPages, template, fontsLoaded
     doc.setDrawColor(0);
     doc.setLineWidth(0.1);
 
-    doc.rect(MARGIN, 20, contentWidth, 26);
-    doc.rect(MARGIN, 20, 45, 26); // Logo Box
-    doc.rect(pageWidth - MARGIN - 45, 20, 45, 26); // Ref Box
+    doc.rect(MARGIN, 20, contentWidth, 28);
+    doc.rect(MARGIN, 20, 45, 28); // Logo Box
+    doc.rect(pageWidth - MARGIN - 45, 20, 45, 28); // Ref Box
 
     try {
-        doc.addImage(qcwsLogo, 'PNG', MARGIN + 9.5, 22.5, 26, 21, undefined, 'FAST');
+        // Increased height to 24mm and width slightly to maintain aspect ratio
+        doc.addImage(qcwsLogo, 'PNG', MARGIN + 7.5, 22, 30, 24, undefined, 'FAST');
     } catch (e) {
         console.error("Logo add error", e);
     }
@@ -124,20 +125,20 @@ const drawStandardTemplate = (doc, pageNumber, totalPages, template, fontsLoaded
 
     if (isWeldingAudit) {
         doc.setFontSize(16);
-        doc.text("Welding Assessment", titleCenterX, 30, { align: 'center' });
-        doc.text("Audit Report", titleCenterX, 38, { align: 'center' });
+        doc.text("Welding Assessment", titleCenterX, 31, { align: 'center' });
+        doc.text("Audit Report", titleCenterX, 39, { align: 'center' });
     } else {
         const titleMain = (template.title || "INSPECTION REPORT").toUpperCase().replace(/\s*REPORT$/i, '').trim();
-        doc.text(titleMain, titleCenterX, 29.5, { align: 'center' });
-        doc.text("REPORT", titleCenterX, 39.5, { align: 'center' });
+        doc.text(titleMain, titleCenterX, 30.5, { align: 'center' });
+        doc.text("REPORT", titleCenterX, 40.5, { align: 'center' });
     }
 
     const refCenterX = pageWidth - MARGIN - 22.5;
     doc.setFontSize(10);
     doc.setFont(primaryFont, "bold");
-    doc.line(pageWidth - MARGIN - 45, 33, pageWidth - MARGIN, 33);
-    doc.text(template.subTitle || "QCWS/F-01", refCenterX, 26.5, { align: 'center' });
-    doc.text("REV.01", refCenterX, 39.5, { align: 'center' });
+    doc.line(pageWidth - MARGIN - 45, 34, pageWidth - MARGIN, 34);
+    doc.text(template.subTitle || "QCWS/F-01", refCenterX, 27.5, { align: 'center' });
+    doc.text("REV.01", refCenterX, 40.5, { align: 'center' });
 
     // 3. Footer
     const footerRow1 = BOX_PAD + 4;
@@ -378,7 +379,7 @@ export const generateIndustrialPDF = async (data, template, mode = 'download') =
 
         // Footer occupies pageHeight-35 to pageHeight; reserve space so content never overlaps
         const FOOTER_TOP = 60; // min gap from bottom (content must end above pageHeight - FOOTER_TOP)
-        const PAGE_START_Y = 53;
+        const PAGE_START_Y = 55;
 
         const localCheckPageBreak = (yOrSpace, requiredSpace) => {
             const y = typeof requiredSpace === 'number' ? yOrSpace : currentY;
@@ -395,7 +396,7 @@ export const generateIndustrialPDF = async (data, template, mode = 'download') =
         // Initial Draw
         const formType = data.formType;
         drawStandardTemplate(doc, 1, doc.internal.getNumberOfPages(), template, fontsLoaded, drawnPages, data);
-        let currentY = 53; // Start below header (Header box ends at 46mm)
+        let currentY = 55; // Start below header (Header box ends at 48mm)
 
         // --- GENERATOR DISPATCH ---
         const generator = GENERATOR_MAP[formType];

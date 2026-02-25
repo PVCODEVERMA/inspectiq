@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +16,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
     Save,
     Download,
-    ChevronLeft,
     Check,
     Upload,
     Trash2,
@@ -24,7 +24,9 @@ import {
     X,
     Printer,
     Camera,
-    Loader2
+    Loader2,
+    Eye,
+    ArrowLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -66,8 +68,8 @@ export const IndustrialFormUI = ({
     handleTableChange,
     handleTableRemove,
     handleSave,
-    navigate
 }) => {
+    const navigate = useNavigate();
     const confirmDeletePhoto = (fieldId, index) => {
         toast((t) => (
             <div className="flex flex-col gap-3 p-1">
@@ -113,22 +115,22 @@ export const IndustrialFormUI = ({
                     subtitle={`${activeTemplate?.subTitle ? activeTemplate.subTitle + ' Report' : 'New Report'}`}
                 />
 
-                <div className="max-w-4xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
+                <div className="max-w-7xl mx-auto p-2 sm:p-6 space-y-4 sm:space-y-8 animate-in fade-in duration-500">
                     {activeTemplate?.steps?.map((step) => (
-                        <div key={step.id} className="bg-white rounded-[2rem] shadow-premium border border-slate-100 overflow-hidden relative">
-                            <div className={cn("px-8 py-6 border-b", activeTemplate?.bg)}>
-                                <div className="flex items-center gap-4">
-                                    <div className={cn("p-3 rounded-xl bg-white shadow-sm", activeTemplate?.color)}>
-                                        {step.icon && <step.icon className="w-8 h-8" />}
+                        <div key={step.id} className="bg-white rounded-xl sm:rounded-[2rem] shadow-premium border border-slate-100 overflow-hidden relative">
+                            <div className={cn("px-4 sm:px-8 py-4 sm:py-6 border-b", activeTemplate?.bg)}>
+                                <div className="flex items-center gap-3 sm:gap-4">
+                                    <div className={cn("p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white shadow-sm", activeTemplate?.color)}>
+                                        {step.icon && <step.icon className="w-6 h-6 sm:w-8 sm:h-8" />}
                                     </div>
                                     <div>
-                                        <h2 className={cn("text-xl font-black tracking-tight", activeTemplate?.color)}>{step.title}</h2>
-                                        {step.description && <p className="text-muted-foreground text-sm mt-1">{step.description}</p>}
+                                        <h2 className={cn("text-lg sm:text-xl font-black tracking-tight", activeTemplate?.color)}>{step.title}</h2>
+                                        {step.description && <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">{step.description}</p>}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="p-8 space-y-6">
+                            <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
                                 {step.fields && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {step.fields.map(field => {
@@ -204,11 +206,24 @@ export const IndustrialFormUI = ({
                                                                     return (
                                                                         <div key={idx} className="group relative aspect-square rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-50 cursor-pointer" onClick={() => { setViewerData({ url, name, fieldId: field.id, index: idx }); setViewerOpen(true); }}>
                                                                             <img src={url} alt={name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center">
-                                                                                <span className="text-[10px] text-white font-medium truncate w-full mb-2">{name}</span>
-                                                                                <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full shadow-lg" onClick={(e) => { e.stopPropagation(); confirmDeletePhoto(field.id, idx); }}>
-                                                                                    <Trash2 className="w-4 h-4" />
+
+                                                                            {/* Overlay */}
+                                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                                                                                <Eye className="w-8 h-8 text-white scale-75 group-hover:scale-100 transition-transform duration-300" />
+
+                                                                                {/* Delete Button - Top Left */}
+                                                                                <Button
+                                                                                    size="icon"
+                                                                                    variant="destructive"
+                                                                                    className="absolute top-2 left-2 h-7 w-7 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 translate-y-[-10px] group-hover:translate-y-0 transition-all duration-300"
+                                                                                    onClick={(e) => { e.stopPropagation(); confirmDeletePhoto(field.id, idx); }}
+                                                                                >
+                                                                                    <Trash2 className="w-3.5 h-3.5" />
                                                                                 </Button>
+
+                                                                                <div className="absolute bottom-2 left-2 right-2 px-2">
+                                                                                    <span className="text-[10px] text-white font-medium truncate block text-center bg-black/20 backdrop-blur-sm rounded px-1">{name}</span>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     );
@@ -317,20 +332,24 @@ export const IndustrialFormUI = ({
                         </div>
                     ))}
 
-                    <div className="bg-white rounded-[2rem] shadow-premium border border-slate-100 p-6 sm:p-8 mt-8">
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-                            <Button variant="outline" size="lg" className="h-14 px-8 rounded-2xl border-2 hover:bg-[#F44034] text-[#F44034] gap-2 font-bold order-2 sm:order-1" onClick={() => navigate(-1)}><ChevronLeft className="w-5 h-5" /> Back</Button>
-                            <div className="flex gap-2 order-1 sm:order-2 flex-1">
-                                <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E]" onClick={() => handleSave(true, 'print')} disabled={isLoading}><Printer className="w-5 h-5" /></Button>
-                                <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] gap-2 font-bold" onClick={() => handleSave(true, 'download')} disabled={isLoading}>
-                                    {isLoading ? (
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                    ) : (
-                                        <Download className="w-5 h-5" />
-                                    )}
-                                    {isLoading ? "Generating..." : "Generate PDF"}
-                                </Button>
-                            </div>
+                    <div className="bg-white rounded-xl sm:rounded-[2rem] shadow-premium border border-slate-100 p-4 sm:p-8 mt-4 sm:mt-8">
+                        <div className="flex flex-row items-center justify-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
+                            <Button variant="outline" size="lg" className="h-12 sm:h-14 px-4 sm:px-8 rounded-2xl border-2 hover:bg-[#F44034] text-[#F44034] gap-2 font-bold transition-all shrink-0" onClick={() => navigate(-1)}>
+                                <ArrowLeft className="w-5 h-5" /> Back
+                            </Button>
+
+                            <Button variant="outline" size="icon" className="h-12 sm:h-14 w-12 sm:w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] hover:text-white transition-all shadow-sm shrink-0" onClick={() => handleSave(true, 'print')} disabled={isLoading}>
+                                <Printer className="w-5 h-5" />
+                            </Button>
+
+                            <Button variant="outline" className="h-12 sm:h-14 px-4 sm:px-8 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] hover:text-white gap-2 font-bold transition-all shadow-sm shrink-0" onClick={() => handleSave(true, 'download')} disabled={isLoading}>
+                                {isLoading ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                ) : (
+                                    <Download className="w-5 h-5" />
+                                )}
+                                <span>{isLoading ? "Generating..." : "Generate PDF"}</span>
+                            </Button>
                         </div>
                     </div>
                 </div>

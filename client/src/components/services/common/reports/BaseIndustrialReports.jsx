@@ -112,7 +112,7 @@ const BaseIndustrialReports = () => {
                 <Button
                     variant="ghost"
                     onClick={() => navigate(`/admin/services/${id}/${serviceType}`)}
-                    className="flex items-center gap-2 hover:bg-white/50 rounded-xl mb-4"
+                    className="flex items-center gap-2  rounded-xl mb-4"
                 >
                     <ArrowLeft className="w-4 h-4" /> Back to Dashboard
                 </Button>

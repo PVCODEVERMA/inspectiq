@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
@@ -137,10 +138,63 @@ const BaseIndustrialDashboard = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="relative w-20 h-20">
-                    <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
-                    <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <div className="min-h-screen bg-background/50 pb-12">
+                {/* Header visible during loading */}
+                <Header title={service?.name || "Loading..."} subtitle={`${serviceType?.toUpperCase()} Dashboard`} />
+
+                <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-8">
+                    {/* Skeleton Action Button */}
+                    <div className="flex justify-end">
+                        <Skeleton className="h-10 w-32 rounded-xl" />
+                    </div>
+
+                    {/* Skeleton KPI Cards */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[1, 2, 3, 4].map(i => (
+                            <Card key={i} className="rounded-3xl border-none shadow-sm h-24 lg:h-32 flex items-center px-6">
+                                <div className="space-y-2 flex-1">
+                                    <Skeleton className="h-3 w-16" />
+                                    <Skeleton className="h-8 w-12" />
+                                </div>
+                                <Skeleton className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl" />
+                            </Card>
+                        ))}
+                    </div>
+
+                    {/* Skeleton Charts */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <Card className="rounded-[2.5rem] border-none shadow-sm h-64 p-6 space-y-4">
+                            <Skeleton className="h-6 w-32" />
+                            <Skeleton className="h-4 w-48" />
+                            <div className="flex-1 flex items-center justify-center">
+                                <Skeleton className="w-32 h-32 rounded-full" />
+                            </div>
+                        </Card>
+                        <Card className="rounded-[2.5rem] border-none shadow-sm h-64 p-6 space-y-4">
+                            <Skeleton className="h-6 w-32" />
+                            <Skeleton className="h-4 w-48" />
+                            <div className="flex-1 flex items-end gap-4 px-4 pb-4">
+                                <Skeleton className="h-[40%] flex-1 rounded-t-lg" />
+                                <Skeleton className="h-[70%] flex-1 rounded-t-lg" />
+                                <Skeleton className="h-[50%] flex-1 rounded-t-lg" />
+                                <Skeleton className="h-[90%] flex-1 rounded-t-lg" />
+                            </div>
+                        </Card>
+                    </div>
+
+                    {/* Skeleton Bottom Actions */}
+                    <div className="max-w-3xl">
+                        <Card className="rounded-[2.5rem] border-none shadow-sm h-48 p-8 space-y-6">
+                            <div className="space-y-2">
+                                <Skeleton className="h-6 w-32" />
+                                <Skeleton className="h-4 w-48" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Skeleton className="h-16 rounded-2xl" />
+                                <Skeleton className="h-16 rounded-2xl" />
+                            </div>
+                        </Card>
+                    </div>
                 </div>
             </div>
         );
@@ -273,116 +327,40 @@ const BaseIndustrialDashboard = () => {
                     </Card>
                 </div>
 
-                {/* Information & List */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <Card className="lg:col-span-2 rounded-[2.5rem] border-none shadow-premium bg-white overflow-hidden">
-                        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 border-b border-border/50">
+                {/* Bottom Section */}
+                <div className="max-w-3xl">
+                    <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-8">
+                        <CardHeader className="px-0 pt-0 pb-6 flex flex-row items-center justify-between">
                             <div>
-                                <CardTitle className="text-2xl font-black">Recent Inspections</CardTitle>
-                                <CardDescription>Managing {service.name} workflow and items</CardDescription>
-                            </div>
-                            <div className="relative w-full sm:w-64">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search reports..."
-                                    className="pl-10 rounded-2xl bg-secondary/50 border-transparent focus:border-primary"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
+                                <CardTitle className="text-xl font-black">Quick Actions</CardTitle>
+                                <CardDescription>Frequent management tasks</CardDescription>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left">
-                                    <thead className="bg-secondary/30">
-                                        <tr>
-                                            <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Report #</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Client / Project</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Date</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</th>
-                                            <th className="px-6 py-4"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border/50">
-                                        {filteredInspections.length > 0 ? filteredInspections.map((insp) => (
-                                            <tr key={insp._id} className="hover:bg-primary/5 transition-colors group">
-                                                <td className="px-6 py-5">
-                                                    <span className="font-bold text-primary group-hover:underline cursor-pointer">
-                                                        {insp.report_no || 'TBD'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <p className="font-bold text-foreground">{insp.client_name}</p>
-                                                    <p className="text-xs text-muted-foreground truncate max-w-[200px]">{insp.project_name || 'No Project'}</p>
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-2 text-sm">
-                                                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                                                        {format(new Date(insp.inspection_date || insp.createdAt), 'dd MMM yyyy')}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <Badge className={cn(
-                                                        "rounded-full px-3 py-1 font-bold text-[10px] uppercase",
-                                                        insp.status === 'approved' ? "bg-green-100 text-green-700" :
-                                                            insp.status === 'pending' ? "bg-amber-100 text-amber-700" :
-                                                                insp.status === 'rejected' ? "bg-red-100 text-red-700" :
-                                                                    "bg-gray-100 text-gray-700"
-                                                    )}>
-                                                        {insp.status}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-6 py-5 text-right">
-                                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/20">
-                                                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        )) : (
-                                            <tr>
-                                                <td colSpan="5" className="px-6 py-12 text-center text-muted-foreground italic">
-                                                    No inspections found matching your criteria
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <CardContent className="p-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <Button variant="outline" className="w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-primary/5 hover:border-primary/50 transition-all text-left">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                        <TrendingUp className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold hover:text-[#F34034]">Operational Stats</p>
+                                        <p className="text-xs text-muted-foreground">Detailed performance analysis</p>
+                                    </div>
+                                </div>
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-green-500/5 hover:border-green-500/50 transition-all text-left">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600">
+                                        <User className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold hover:text-[#F34034]">Assigned Inspectors</p>
+                                        <p className="text-xs text-muted-foreground">Manage field personnel</p>
+                                    </div>
+                                </div>
+                            </Button>
                         </CardContent>
                     </Card>
-
-                    <div className="space-y-6">
-
-                        <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-6">
-                            <CardHeader className="px-0 pt-0 pb-6">
-                                <CardTitle className="text-lg font-bold">Quick Actions</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0 space-y-3">
-                                <Button variant="outline" className="w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-primary/5 hover:border-primary/50 transition-all text-left">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                            <TrendingUp className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold">Operational Stats</p>
-                                            <p className="text-xs text-muted-foreground">Detailed performance analysis</p>
-                                        </div>
-                                    </div>
-                                </Button>
-                                <Button variant="outline" className="w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-green-500/5 hover:border-green-500/50 transition-all text-left">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600">
-                                            <User className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold">Assigned Inspectors</p>
-                                            <p className="text-xs text-muted-foreground">Manage field personnel</p>
-                                        </div>
-                                    </div>
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </div>
                 </div>
             </div>
         </div>

@@ -145,10 +145,11 @@ const Dashboard = () => {
                       </Card>
                     ))
                   ) : (
-                    filteredResults.services.map(s => (
+                    filteredResults.services.map((s, idx) => (
                       <Card
                         key={s._id}
-                        className="rounded-3xl border-none shadow-premium hover:shadow-2xl transition-all overflow-hidden group cursor-pointer hover:bg-muted/50"
+                        className="rounded-3xl border-none shadow-premium hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer hover:bg-muted/50 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
+                        style={{ animationDelay: `${idx * 75}ms` }}
                         onClick={() => {
                           setSearchQuery(''); // Clear search on navigation
                           navigate(`/admin/services/${s._id}/${s.name.toLowerCase().replace(/\s+/g, '-')}`);
@@ -272,6 +273,7 @@ const Dashboard = () => {
                   change="12"
                   icon={IndianRupee}
                   variant="red"
+                  className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
                 />
                 <PremiumMetricCard
                   label="Active Projects"
@@ -279,6 +281,7 @@ const Dashboard = () => {
                   change="8"
                   icon={Briefcase}
                   variant="green"
+                  className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
                 />
                 <PremiumMetricCard
                   label="Total Clients"
@@ -286,6 +289,7 @@ const Dashboard = () => {
                   change="5"
                   icon={ShieldCheck}
                   variant="orange"
+                  className="animate-in fade-in slide-in-from-bottom-4 duration-1000 fill-mode-both"
                 />
                 <PremiumMetricCard
                   label="Total Employees"
@@ -293,6 +297,7 @@ const Dashboard = () => {
                   change="3"
                   icon={Users2}
                   variant="blue"
+                  className="animate-in fade-in slide-in-from-bottom-4 duration-[1200ms] fill-mode-both"
                 />
               </div>
             )}
@@ -307,33 +312,9 @@ const Dashboard = () => {
 
             {/* Main Content */}
             {role !== 'master_admin' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Inspections Table */}
-                <div className="lg:col-span-2 space-y-4">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <h2 className="text-xl font-display font-semibold">Recent Inspections</h2>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                      {role !== 'inspector' && (
-                        <Button variant="hero" size="sm" className="flex-1 sm:flex-none" onClick={() => navigate('/inspections/new')}>
-                          <Plus className="w-4 h-4 mr-1" />
-                          New Inspection
-                        </Button>
-                      )}
-                      <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => navigate('/inspections')}>
-                        View All
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <InspectionTable inspections={[]} />
-                  </div>
-                </div>
-
-                {/* Sidebar */}
-                <div className="space-y-6">
-                  <QuickActions />
-                  <ActivityFeed activities={[]} />
-                </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <QuickActions />
+                <ActivityFeed activities={[]} />
               </div>
             )}
           </>

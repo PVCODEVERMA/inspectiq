@@ -177,37 +177,29 @@ const ClientManagement = () => {
                 {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                            <Card key={`client-skeleton-${i}`} className="border-none shadow-sm rounded-2xl overflow-hidden">
-                                <CardHeader className="bg-muted/30 pb-4">
+                            <Card key={`client-skeleton-${i}`} className="border-none shadow-sm rounded-2xl overflow-hidden animate-pulse">
+                                <CardHeader className="bg-muted/20 pb-4">
                                     <div className="flex justify-between items-start">
-                                        <Skeleton className="w-11 h-11 rounded-xl" />
+                                        <Skeleton className="w-11 h-11 rounded-xl bg-muted/40" />
                                     </div>
-                                    <Skeleton className="h-6 w-3/4 mt-4" />
-                                    <Skeleton className="h-3 w-1/3 mt-2" />
+                                    <Skeleton className="h-6 w-3/4 mt-4 bg-muted/40" />
+                                    <Skeleton className="h-3 w-1/3 mt-2 bg-muted/40" />
                                 </CardHeader>
                                 <CardContent className="pt-4 space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <Skeleton className="w-4 h-4 rounded-full" />
-                                        <Skeleton className="h-4 flex-1" />
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Skeleton className="w-4 h-4 rounded-full" />
-                                        <Skeleton className="h-4 w-1/2" />
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Skeleton className="w-4 h-4 rounded-full" />
-                                        <Skeleton className="h-4 w-2/3" />
-                                    </div>
+                                    <Skeleton className="h-4 w-full bg-muted/30" />
+                                    <Skeleton className="h-4 w-2/3 bg-muted/30" />
+                                    <Skeleton className="h-4 w-1/2 bg-muted/30" />
                                 </CardContent>
                             </Card>
                         ))}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredClients.map((client) => (
+                        {filteredClients.map((client, idx) => (
                             <Card
                                 key={client._id}
-                                className="group hover:shadow-premium transition-all duration-300 border-none shadow-sm rounded-2xl overflow-hidden hover:-translate-y-1 cursor-pointer"
+                                className="group hover:shadow-premium transition-all duration-300 border-none shadow-sm rounded-2xl overflow-hidden hover:-translate-y-1 cursor-pointer animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
+                                style={{ animationDelay: `${idx * 50}ms` }}
                                 onClick={() => navigate(`/admin/clients/${client._id}`)}
                             >
                                 <CardHeader className="bg-muted/30 pb-4">

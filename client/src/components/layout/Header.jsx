@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { cn, getFileUrl } from '@/lib/utils';
@@ -33,12 +33,21 @@ export const Header = ({ title, shortTitle, subtitle }) => {
   const { profile, signOut, role } = useAuth();
   const { toggleMobileSidebar, isSearchOpen, searchQuery, setSearchQuery } = useSidebar();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isFormRoute =
+    location.pathname.includes('/new') ||
+    location.pathname.includes('/edit/') ||
+    location.pathname.includes('/selection');
 
   const userName = profile?.full_name || profile?.email || 'User';
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-4 bg-primary backdrop-blur-xl border-b border-border shadow-sm">
+    <header className={cn(
+      "sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-4 bg-primary backdrop-blur-xl border-b border-border shadow-sm",
+      isFormRoute && "hidden md:flex"
+    )}>
       <div className="flex items-center gap-4 min-w-0 flex-1 mr-4">
 
         <div className={cn("flex flex-col min-w-0 transition-opacity duration-200", isSearchOpen ? "hidden sm:flex" : "flex")}>
@@ -78,7 +87,7 @@ export const Header = ({ title, shortTitle, subtitle }) => {
       </div>
 
       <div className="flex items-center gap-4 rounded-full">
-       
+
 
         {/* Search */}
         <div className="relative hidden md:block ">
@@ -98,32 +107,50 @@ export const Header = ({ title, shortTitle, subtitle }) => {
         </div>
 
         {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative text-white hover:text-foreground">
-              <Bell className="w-5 h-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-xs">
-                3
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" sideOffset={8} className="w-[90vw] sm:w-80 sm:align-end mx-auto p-2">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
-              <p className="font-medium">New inspection assigned</p>
-              <p className="text-xs text-muted-foreground">Heat Exchanger Inspection - HE-2024-008</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
-              <p className="font-medium">Inspection approved</p>
-              <p className="text-xs text-muted-foreground">PSI-2024-045 has been approved</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
-              <p className="font-medium">AI Alert</p>
-              <p className="text-xs text-muted-foreground">Missing photos detected in VCA-2024-012</p>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center">
+          {/* Mobile Bell: Link to Dashboard */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative text-white hover:text-foreground md:hidden"
+            onClick={() => navigate('/dashboard')}
+          >
+            <Bell className="w-5 h-5" />
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-xs">
+              3
+            </Badge>
+          </Button>
+
+          {/* Desktop Bell: Dropdown Menu */}
+          <div className="hidden md:block">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative text-white hover:text-foreground">
+                  <Bell className="w-5 h-5" />
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-xs">
+                    3
+                  </Badge>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8} className="w-80 p-2">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
+                  <p className="font-medium">New inspection assigned</p>
+                  <p className="text-xs text-muted-foreground">Heat Exchanger Inspection - HE-2024-008</p>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
+                  <p className="font-medium">Inspection approved</p>
+                  <p className="text-xs text-muted-foreground">PSI-2024-045 has been approved</p>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
+                  <p className="font-medium">AI Alert</p>
+                  <p className="text-xs text-muted-foreground">Missing photos detected in VCA-2024-012</p>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
 
 
         {/* User Menu */}
