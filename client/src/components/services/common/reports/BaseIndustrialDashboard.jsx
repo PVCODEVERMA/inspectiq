@@ -28,10 +28,24 @@ import {
 } from 'recharts';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { format, eachMonthOfInterval, subMonths } from 'date-fns';
+import { format, eachMonthOfInterval, subMonths, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { useInspectionsQuery } from '@/hooks/queryHooks';
 import { useLoadingDelay } from '@/hooks/useLoadingDelay';
 import { useHeader } from '@/contexts/HeaderContext';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarIcon, Filter, Layers } from 'lucide-react';
 
 const BaseIndustrialDashboard = () => {
     const { id, serviceType } = useParams();
@@ -41,6 +55,13 @@ const BaseIndustrialDashboard = () => {
     const [isServiceLoading, setIsServiceLoading] = useState(true);
     const [isNavigating, setIsNavigating] = useState(false);
 
+    // Filter States
+    const [roleFilter, setRoleFilter] = useState('all');
+    const [dateRange, setDateRange] = useState({
+        from: subMonths(new Date(), 5),
+        to: new Date()
+    });
+
     const handleStatClick = (status) => {
         setIsNavigating(true);
         navigate(`/admin/services/${id}/${serviceType}/reports?status=${status}`);
@@ -48,6 +69,64 @@ const BaseIndustrialDashboard = () => {
 
     const { data: inspections = [], isLoading: isQueryLoading } = useInspectionsQuery(id);
     const showSkeleton = useLoadingDelay(isQueryLoading || isServiceLoading, 300);
+
+    const filteredInspections = useMemo(() => {
+        return inspections.filter(insp => {
+            // 1. Role Filter
+            const userRole = insp.creator_role || insp.inspector_role || (insp.inspector?.role) || 'unknown';
+            const matchesRole = roleFilter === 'all' || userRole.toLowerCase() === roleFilter.toLowerCase();
+
+            // 2. Date Range Filter
+            let matchesDate = true;
+            if (dateRange?.from && dateRange?.to) {
+                const inspDate = new Date(insp.inspection_date || insp.date || insp.createdAt);
+                matchesDate = isWithinInterval(inspDate, {
+                    start: startOfMonth(dateRange.from),
+                    end: endOfMonth(dateRange.to)
+                });
+            }
+
+            return matchesRole && matchesDate;
+        });
+    }, [inspections, roleFilter, dateRange]);
+
+    const stats = useMemo(() => {
+        const approved = filteredInspections.filter(i => i.status === 'approved').length;
+        const pending = filteredInspections.filter(i => i.status === 'pending' || i.status === 'in_progress').length;
+        const rejected = filteredInspections.filter(i => i.status === 'rejected').length;
+        return {
+            total: filteredInspections.length,
+            approved,
+            pending,
+            rejected
+        };
+    }, [filteredInspections]);
+
+    const pieData = useMemo(() => {
+        return [
+            { name: 'Approved', value: stats.approved, color: '#22c55e' },
+            { name: 'Pending', value: stats.pending, color: '#f59e0b' },
+            { name: 'Rejected', value: stats.rejected, color: '#ef4444' }
+        ].filter(d => d.value > 0);
+    }, [stats]);
+
+    const barData = useMemo(() => {
+        if (!dateRange?.from || !dateRange?.to) return [];
+
+        const months = eachMonthOfInterval({
+            start: startOfMonth(dateRange.from),
+            end: endOfMonth(dateRange.to)
+        });
+
+        return months.map(month => {
+            const label = format(month, 'MMM');
+            const count = filteredInspections.filter(insp => {
+                const date = new Date(insp.inspection_date || insp.date || insp.createdAt);
+                return format(date, 'MMM yyyy') === format(month, 'MMM yyyy');
+            }).length;
+            return { month: label, count };
+        });
+    }, [filteredInspections, dateRange]);
 
     // Fetch Service Details
     useEffect(() => {
@@ -74,42 +153,6 @@ const BaseIndustrialDashboard = () => {
             setPageInfo("Loading...", "Fetching module details");
         }
     }, [service, isServiceLoading, isNavigating, serviceType, setPageInfo]);
-
-    const stats = useMemo(() => {
-        const approved = inspections.filter(i => i.status === 'approved').length;
-        const pending = inspections.filter(i => i.status === 'pending' || i.status === 'in_progress').length;
-        const rejected = inspections.filter(i => i.status === 'rejected').length;
-        return {
-            total: inspections.length,
-            approved,
-            pending,
-            rejected
-        };
-    }, [inspections]);
-
-    const pieData = useMemo(() => {
-        return [
-            { name: 'Approved', value: stats.approved, color: '#22c55e' },
-            { name: 'Pending', value: stats.pending, color: '#f59e0b' },
-            { name: 'Rejected', value: stats.rejected, color: '#ef4444' }
-        ].filter(d => d.value > 0);
-    }, [stats]);
-
-    const barData = useMemo(() => {
-        const months = eachMonthOfInterval({
-            start: subMonths(new Date(), 5),
-            end: new Date()
-        });
-
-        return months.map(month => {
-            const label = format(month, 'MMM');
-            const count = inspections.filter(insp => {
-                const date = new Date(insp.inspection_date || insp.date || insp.createdAt);
-                return format(date, 'MMM yyyy') === format(month, 'MMM yyyy');
-            }).length;
-            return { month: label, count };
-        });
-    }, [inspections]);
 
     if (showSkeleton || isNavigating) {
         return (
@@ -221,10 +264,77 @@ const BaseIndustrialDashboard = () => {
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-6">
-                    <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-xl font-black">Status Distribution</CardTitle>
-                        <CardDescription>Live breakdown of inspection outcomes</CardDescription>
+                <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-6 overflow-visible">
+                    <CardHeader className="px-0 pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0 pb-6">
+                        <div>
+                            <CardTitle className="text-xl font-black">Volume Trends</CardTitle>
+                            <CardDescription>Inspections over selected interval</CardDescription>
+                        </div>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto rounded-xl border-dashed gap-2 px-3 justify-start sm:justify-center">
+                                    <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                    <span className="font-bold text-xs lg:text-sm truncate">
+                                        {dateRange?.from ? (
+                                            dateRange.to ? (
+                                                `${format(dateRange.from, "MMM yy")} - ${format(dateRange.to, "MMM yy")}`
+                                            ) : (
+                                                format(dateRange.from, "MMM yyyy")
+                                            )
+                                        ) : (
+                                            "Select range"
+                                        )}
+                                    </span>
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[300px] sm:w-auto p-0 rounded-2xl border-none shadow-2xl overflow-hidden" align="end" sideOffset={8}>
+                                <div className="p-1">
+                                    <Calendar
+                                        initialFocus
+                                        mode="range"
+                                        defaultMonth={dateRange?.from}
+                                        selected={dateRange}
+                                        onSelect={setDateRange}
+                                        numberOfMonths={1}
+                                        disabled={(date) => date > new Date()}
+                                        className="rounded-xl border-none"
+                                    />
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+                    </CardHeader>
+                    <CardContent className="h-64 px-0">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={barData}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                <XAxis dataKey="month" axisLine={false} tickLine={false} />
+                                <YAxis axisLine={false} tickLine={false} />
+                                <Tooltip cursor={{ fill: '#f8fafc' }} />
+                                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={32} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+                <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-6 overflow-visible">
+                    <CardHeader className="px-0 pt-0 flex flex-row items-center justify-between space-y-0 pb-6">
+                        <div>
+                            <CardTitle className="text-xl font-black">Status Distribution</CardTitle>
+                            <CardDescription>Live breakdown of inspection outcomes</CardDescription>
+                        </div>
+                        <Select value={roleFilter} onValueChange={setRoleFilter}>
+                            <SelectTrigger className="w-[130px] rounded-xl border-dashed">
+                                <div className="flex items-center gap-2">
+                                    <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+                                    <SelectValue placeholder="All Roles" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-none shadow-2xl">
+                                <SelectItem value="all">All Roles</SelectItem>
+                                <SelectItem value="inspector">Inspectors</SelectItem>
+                                <SelectItem value="company_admin">Admins</SelectItem>
+                                <SelectItem value="super_admin">Super Admins</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </CardHeader>
                     <CardContent className="h-64 px-0">
                         {pieData.length > 0 ? (
@@ -252,55 +362,35 @@ const BaseIndustrialDashboard = () => {
                         )}
                     </CardContent>
                 </Card>
-
-                <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-6">
-                    <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-xl font-black">Volume Trends</CardTitle>
-                        <CardDescription>Total inspections over last 6 months</CardDescription>
-                    </CardHeader>
-                    <CardContent className="h-64 px-0">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={barData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                                <YAxis axisLine={false} tickLine={false} />
-                                <Tooltip cursor={{ fill: '#f8fafc' }} />
-                                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={32} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
             </div>
 
             {/* Bottom Section */}
-            <div className="max-w-3xl">
-                <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-8">
-                    <CardHeader className="px-0 pt-0 pb-6 flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="text-xl font-black">Quick Actions</CardTitle>
-                            <CardDescription>Frequent management tasks</CardDescription>
-                        </div>
+            <div className="max-w-3xl mb-34">
+                <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-5 sm:p-8">
+                    <CardHeader className="px-0 pt-0 pb-6">
+                        <CardTitle className="text-xl font-black">Quick Actions</CardTitle>
+                        <CardDescription>Frequent management tasks</CardDescription>
                     </CardHeader>
-                    <CardContent className="p-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Button variant="outline" className="group w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-primary/5 hover:border-primary/50 transition-all text-left border-slate-200">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <CardContent className="p-0 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <Button variant="outline" className="group w-full justify-start rounded-2xl p-4 sm:p-6 h-auto border-dashed border-2 hover:bg-primary/5 hover:border-primary/50 transition-all text-left border-slate-200">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                                     <TrendingUp className="w-5 h-5" />
                                 </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-800 group-hover:text-primary transition-colors">Operational Stats</p>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group-hover:text-slate-500 transition-colors">Detailed performance analysis</p>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-black text-slate-800 group-hover:text-primary transition-colors truncate">Operational Stats</p>
+                                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group-hover:text-slate-500 transition-colors line-clamp-1">Detailed performance analysis</p>
                                 </div>
                             </div>
                         </Button>
-                        <Button variant="outline" className="group w-full justify-start rounded-2xl p-6 h-auto border-dashed border-2 hover:bg-green-500/5 hover:border-green-500/50 transition-all text-left border-slate-200">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                        <Button variant="outline" className="group w-full justify-start rounded-2xl p-4 sm:p-6 h-auto border-dashed border-2 hover:bg-green-500/5 hover:border-green-500/50 transition-all text-left border-slate-200">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="w-10 h-10 shrink-0 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
                                     <User className="w-5 h-5" />
                                 </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-800 group-hover:text-green-600 transition-colors">Assigned Inspectors</p>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group-hover:text-slate-500 transition-colors">Manage field personnel</p>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-black text-slate-800 group-hover:text-green-600 transition-colors truncate">Assigned Inspectors</p>
+                                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group-hover:text-slate-500 transition-colors line-clamp-1">Manage field personnel</p>
                                 </div>
                             </div>
                         </Button>
