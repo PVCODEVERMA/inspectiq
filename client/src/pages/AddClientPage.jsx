@@ -13,6 +13,10 @@ const AddClientPage = () => {
     const navigate = useNavigate();
     const { setPageInfo } = useHeader();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        setPageInfo("Register New Client", "Add a new company to your inspection network");
+    }, [setPageInfo]);
     const [formData, setFormData] = useState({
         name: '',
         address: '',
@@ -26,10 +30,6 @@ const AddClientPage = () => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
-
-    useEffect(() => {
-        setPageInfo('Register New Client', 'Add a new company to your inspection network');
-    }, [setPageInfo]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

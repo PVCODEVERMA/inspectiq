@@ -50,7 +50,7 @@ const EditClientPage = () => {
     }, [id, navigate]);
 
     useEffect(() => {
-        setPageInfo('Edit Client Details', `Updating information for ${formData.name || 'Client'}`);
+        setPageInfo('Edit Client Details', `Updating information for ${formData.name || 'client'}`);
     }, [setPageInfo, formData.name]);
 
     const handleInputChange = (e) => {

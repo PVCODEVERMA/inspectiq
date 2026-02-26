@@ -20,7 +20,7 @@ const ProfilePage = () => {
     const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
-        setPageInfo("My Profile", "Manage your account settings and profile picture");
+        setPageInfo('My Profile', 'Manage your account settings and profile picture');
     }, [setPageInfo]);
 
     const handleFileChange = async (e) => {

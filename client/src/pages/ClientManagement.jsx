@@ -25,6 +25,10 @@ const ClientManagement = () => {
     const navigate = useNavigate();
     const { setPageInfo } = useHeader();
 
+    useEffect(() => {
+        setPageInfo("Client Management", "Manage your client companies and their details");
+    }, [setPageInfo]);
+
     const fetchClients = async () => {
         setIsLoading(true);
         try {
@@ -41,10 +45,6 @@ const ClientManagement = () => {
     useEffect(() => {
         fetchClients();
     }, []);
-
-    useEffect(() => {
-        setPageInfo('Client Management', 'Manage your client companies and their details');
-    }, [setPageInfo]);
 
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this client?')) return;
