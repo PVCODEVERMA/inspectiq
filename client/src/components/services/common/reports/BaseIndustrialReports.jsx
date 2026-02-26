@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useSidebar } from '@/contexts/SidebarContext';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Search, Filter, Calendar, Download } from 'lucide-react';
+import { ArrowLeft, Search, Filter, Calendar as CalendarIcon, Download } from 'lucide-react';
 import { InspectionTable } from '@/components/dashboard/InspectionTable';
 import api from '@/lib/api';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format, isSameDay } from 'date-fns';
+import * as XLSX from 'xlsx';
 import { generateEngineeringInspection } from '@/components/services/tpi/pdf/generateEngineeringInspection';
 
 const BaseIndustrialReports = () => {
@@ -23,6 +29,14 @@ const BaseIndustrialReports = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState(statusParam);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const { setIsSearchOpen } = useSidebar();
+
+    useEffect(() => {
+        // Open search bar on mount for better discoverability on this page
+        setIsSearchOpen(true);
+        return () => setIsSearchOpen(false);
+    }, []);
 
     useEffect(() => {
         setStatusFilter(statusParam);
@@ -80,9 +94,15 @@ const BaseIndustrialReports = () => {
                 (insp.client_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (insp.project_name?.toLowerCase().includes(searchTerm.toLowerCase()));
             const matchesStatus = statusFilter === 'all' || insp.status === statusFilter;
-            return matchesSearch && matchesStatus;
+
+            const matchesDate = !selectedDate || (
+                (insp.inspection_date || insp.date) &&
+                isSameDay(new Date(insp.inspection_date || insp.date), selectedDate)
+            );
+
+            return matchesSearch && matchesStatus && matchesDate;
         });
-    }, [inspections, searchTerm, statusFilter]);
+    }, [inspections, searchTerm, statusFilter, selectedDate]);
 
     const counts = useMemo(() => {
         return {
@@ -140,20 +160,18 @@ const BaseIndustrialReports = () => {
         <div className="min-h-screen bg-background/50 pb-12">
             <Header
                 title={`${service?.name || 'Service'} Reports`}
-                subtitle={`Viewing all ${statusFilter !== 'all' ? statusFilter : ''} records for ${serviceType}`}
+                subtitle=""
+                showSearch={true}
+                searchValue={searchTerm}
+                onSearchChange={setSearchTerm}
+                searchPlaceholder="Search by report no, client, or project..."
             />
 
             <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
-                <Button
-                    variant="ghost"
-                    onClick={() => navigate(`/admin/services/${id}/${serviceType}`)}
-                    className="flex items-center gap-2  rounded-xl mb-4"
-                >
-                    <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-                </Button>
+
 
                 {/* Status Tabs */}
-                <div className="flex overflow-x-auto pb-2 gap-3 no-scrollbar">
+                <div className="flex overflow-x-auto pb-2 gap-2 sm:gap-3 no-scrollbar -mx-1 px-1">
                     {['all', 'approved', 'pending', 'rejected'].map((status) => (
                         <button
                             key={status}
@@ -162,15 +180,15 @@ const BaseIndustrialReports = () => {
                                 setSearchParams({ status });
                             }}
                             className={cn(
-                                "flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold transition-all whitespace-nowrap border-2",
+                                "flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-5 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl font-bold transition-all whitespace-nowrap border-2 text-[10px] sm:text-sm",
                                 statusFilter === status
-                                    ? "bg-primary border-primary text-white shadow-glow translate-y-[-2px]"
+                                    ? "bg-primary border-primary text-white shadow-glow translate-y-[-1px] sm:translate-y-[-2px]"
                                     : "bg-white border-slate-100 text-slate-600 hover:border-primary/20 hover:bg-primary/5"
                             )}
                         >
                             <span className="capitalize">{status}</span>
                             <span className={cn(
-                                "text-[10px] px-2 py-0.5 rounded-lg font-black",
+                                "text-[8px] sm:text-[10px] px-1 sm:px-2 py-0.5 rounded-md sm:rounded-lg font-black",
                                 statusFilter === status ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
                             )}>
                                 {counts[status]}
@@ -180,94 +198,111 @@ const BaseIndustrialReports = () => {
                 </div>
 
                 {/* Filters */}
-                <Card className="rounded-3xl border-none shadow-premium bg-white">
-                    <CardContent className="p-4 flex flex-col sm:flex-row gap-4 items-center">
-                        <div className="relative flex-1 w-full">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search by report no, client, or project..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 rounded-2xl bg-secondary/30 border-none"
-                            />
-                        </div>
+                <Card className="rounded-2xl sm:rounded-3xl border-none shadow-premium bg-white">
+                    <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row gap-4 sm:items-center justify-end">
                         <div className="flex gap-2 w-full sm:w-auto">
-                            <Button variant="outline" className="rounded-xl flex-1 sm:flex-none">
-                                <Calendar className="w-4 h-4 mr-2" />
-                                Date
-                            </Button>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className={cn(
+                                            "rounded-xl h-10 w-10 sm:h-12 sm:w-12 transition-all",
+                                            selectedDate && "border-primary bg-primary/5 text-primary"
+                                        )}
+                                    >
+                                        <CalendarIcon className="w-4 h-4" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0 rounded-2xl border-none shadow-2xl" align="end">
+                                    <Calendar
+                                        mode="single"
+                                        selected={selectedDate}
+                                        onSelect={setSelectedDate}
+                                        initialFocus
+                                        className="rounded-2xl"
+                                    />
+                                    {selectedDate && (
+                                        <div className="p-2 border-t border-slate-100 flex justify-end">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setSelectedDate(null)}
+                                                className="text-[10px] h-7 px-2 text-muted-foreground hover:text-destructive"
+                                            >
+                                                Clear Date
+                                            </Button>
+                                        </div>
+                                    )}
+                                </PopoverContent>
+                            </Popover>
+
                             <Button
                                 variant="outline"
-                                className="rounded-xl flex-1 sm:flex-none"
-                                onClick={async () => {
+                                size="icon"
+                                title="Export Excel"
+                                className="rounded-xl h-10 w-10 sm:h-12 sm:w-12 border-emerald-500/20 bg-emerald-500/5 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shrink-0"
+                                onClick={() => {
                                     if (filteredInspections.length === 0) return toast.error("No reports to export");
-                                    const loadingToast = toast.loading(`Exporting ${filteredInspections.length} reports...`);
+
+                                    const loadingToast = toast.loading(`Generating Excel for ${filteredInspections.length} reports...`);
+
                                     try {
-                                        // Dynamic imports
-                                        const { generateIndustrialPDF } = await import('@/components/services/common/pdf/generateIndustrialPDF');
-                                        const { reportTemplates } = await import('@/data/reportTemplates');
-                                        const { industrialReportTypes } = await import('@/data/industrialReportTypes');
+                                        // Prepare data for Excel
+                                        const excelData = filteredInspections.map(insp => ({
+                                            'Report No': insp.report_no || insp._id.slice(-6).toUpperCase(),
+                                            'Client': insp.client_name || 'N/A',
+                                            'Project': insp.project_name || 'N/A',
+                                            'Date': (insp.inspection_date || insp.date) ? format(new Date(insp.inspection_date || insp.date), 'PP') : 'N/A',
+                                            'Status': insp.status?.toUpperCase() || 'N/A',
+                                            'Type': insp.report_type || serviceType
+                                        }));
 
-                                        for (const insp of filteredInspections) {
-                                            const fType = insp.formType;
-                                            let endpoint = `/inspections/${insp._id}`;
+                                        // Create workbook and worksheet
+                                        const worksheet = XLSX.utils.json_to_sheet(excelData);
+                                        const workbook = XLSX.utils.book_new();
+                                        XLSX.utils.book_append_sheet(workbook, worksheet, "Reports");
 
-                                            if (fType === 'ultrasonic-test') endpoint = `/ndt/ultrasonic/${insp._id}`;
-                                            else if (fType === 'magnetic-particle') endpoint = `/ndt/magnetic-particle/${insp._id}`;
-                                            else if (fType === 'liquid-penetrant') endpoint = `/ndt/liquid-penetrant/${insp._id}`;
-                                            else if (fType === 'ndt-summary-report') endpoint = `/ndt/summary/${insp._id}`;
-                                            else if (fType === 'welding-assessment-audit') endpoint = `/consultancy/welding-audit/${insp._id}`;
-                                            else if (fType === 'Engineering Inspection Report' || fType === 'Engineering Inspection' || fType === 'engineering-inspection') endpoint = `/tpi/engineering/${insp._id}`;
+                                        // Set column widths
+                                        worksheet['!cols'] = [
+                                            { wch: 20 }, // Report No
+                                            { wch: 30 }, // Client
+                                            { wch: 30 }, // Project
+                                            { wch: 15 }, // Date
+                                            { wch: 15 }, // Status
+                                            { wch: 25 }  // Type
+                                        ];
 
-                                            const res = await api.get(endpoint);
-                                            const data = res.data;
+                                        // Export file
+                                        const fileName = `${serviceType}_reports_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+                                        XLSX.writeFile(workbook, fileName);
 
-                                            // Find template
-                                            const fTypeData = data.formType || '';
-                                            const normalizedType = fTypeData.toLowerCase().replace(/[\s\-_]+/g, '-');
-                                            let template = reportTemplates[fTypeData] || reportTemplates[normalizedType];
-
-                                            if (!template) {
-                                                Object.values(industrialReportTypes).forEach(group => {
-                                                    const found = group.find(t => t.id === fTypeData || t.title === fTypeData || t.id === normalizedType);
-                                                    if (found) {
-                                                        template = reportTemplates[found.id] || found;
-                                                    }
-                                                });
-                                            }
-
-                                            if (template) {
-                                                await generateIndustrialPDF(data, template);
-                                            } else {
-                                                // The original instruction was to replace generateInspectionPDF with generateEngineeringInspection.
-                                                // The provided Code Edit snippet was syntactically incorrect for this context.
-                                                // Assuming the intent was to call generateEngineeringInspection with the 'data' object,
-                                                // similar to how generateInspectionPDF was called.
-                                                await generateEngineeringInspection(data);
-                                            }
-                                        }
-                                        toast.success("Export completed", { id: loadingToast });
-                                    } catch (err) {
-                                        console.error(err);
-                                        toast.error("Export failed", { id: loadingToast });
+                                        toast.success("Excel exported successfully!", { id: loadingToast });
+                                    } catch (error) {
+                                        console.error("Excel Export Error:", error);
+                                        toast.error("Failed to generate Excel", { id: loadingToast });
                                     }
                                 }}
                             >
-                                <Download className="w-4 h-4 mr-2" />
-                                Export
+                                <Download className="w-4 h-4" />
                             </Button>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Table */}
-                <Card className="rounded-[2.5rem] border-none shadow-premium bg-white overflow-hidden">
+                <Card className="rounded-2xl sm:rounded-[2.5rem] border-none shadow-premium bg-white overflow-hidden">
                     <div className="overflow-x-auto">
-                        <InspectionTable inspections={filteredInspections} />
+                        <InspectionTable
+                            inspections={filteredInspections}
+                            serviceId={id}
+                            serviceType={serviceType}
+                            onRefresh={fetchData}
+                        />
                     </div>
                 </Card>
             </div>
-        </div>
+        </div >
     );
 };
 

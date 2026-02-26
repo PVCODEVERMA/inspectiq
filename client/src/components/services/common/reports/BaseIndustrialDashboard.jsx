@@ -114,9 +114,16 @@ const BaseIndustrialDashboard = () => {
     }, [inspections, searchTerm, statusFilter]);
 
     const stats = useMemo(() => {
-        if (!service?.stats) return { total: 0, approved: 0, pending: 0, rejected: 0 };
-        return service.stats;
-    }, [service]);
+        const approved = inspections.filter(i => i.status === 'approved').length;
+        const pending = inspections.filter(i => i.status === 'pending' || i.status === 'in_progress').length;
+        const rejected = inspections.filter(i => i.status === 'rejected').length;
+        return {
+            total: inspections.length,
+            approved,
+            pending,
+            rejected
+        };
+    }, [inspections]);
 
     const pieData = useMemo(() => {
         return [
@@ -135,7 +142,7 @@ const BaseIndustrialDashboard = () => {
         return months.map(month => {
             const label = format(month, 'MMM');
             const count = inspections.filter(insp => {
-                const date = new Date(insp.inspection_date || insp.createdAt);
+                const date = new Date(insp.inspection_date || insp.date || insp.createdAt);
                 return format(date, 'MMM yyyy') === format(month, 'MMM yyyy');
             }).length;
             return { month: label, count };

@@ -41,7 +41,7 @@ const statusConfig = {
 };
 
 const typeConfig = {
-  engineering: { label: 'Engineering', class: 'bg-primary/10 text-primary' },
+  engineering: { label: 'Engineering', class: 'bg-primary/10 text-slate-900' },
   pre_shipment: { label: 'Pre-Shipment', class: 'bg-info/10 text-info' },
   vendor_assessment: { label: 'Vendor Audit', class: 'bg-warning/10 text-warning' },
   lifts: { label: 'Lifts Inspection', class: 'bg-accent/10 text-accent' },
@@ -57,18 +57,21 @@ const riskConfig = {
 export const InspectionTable = ({
   inspections,
   showActions = true,
+  serviceId,
+  serviceType,
+  onRefresh
 }) => {
   const navigate = useNavigate();
 
   const getFormPath = (type, id, formType) => {
-    // If it's an NDT report, route to the generic form with query param
+    // If we have service context, use absolute industrial service routes
+    if (serviceId && serviceType) {
+      return `/admin/services/${serviceId}/${serviceType}/edit/${id}`;
+    }
+
+    // Fallback for general inspections or legacy NDT
     if (formType && ['ultrasonic-test', 'magnetic-particle', 'liquid-penetrant', 'ndt-summary-report'].includes(formType)) {
-      // Assume the parent route is /admin/services/:id/:serviceType/edit/:inspectionId
-      // We might need to construct it carefully or just rely on the parent router context
-      // Ideally: /admin/services/:serviceId/:serviceType/edit/:id?formType=...
-      // But we don't have serviceId here easily unless passed. 
-      // Use a relative path if possible or generic
-      return `edit/${id}?formType=${formType}`;
+      return `/services/industrial-inspection/${formType}/${id}/edit`;
     }
 
     const paths = {
@@ -86,13 +89,13 @@ export const InspectionTable = ({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 border-none">
-            <TableHead className="font-bold text-slate-800">Report No</TableHead>
-            <TableHead className="font-bold text-slate-800 hidden md:table-cell">Type</TableHead>
-            <TableHead className="font-bold text-slate-800">Client / Project</TableHead>
-            <TableHead className="font-bold text-slate-800 hidden lg:table-cell">Inspector</TableHead>
-            <TableHead className="font-bold text-slate-800">Status</TableHead>
-            <TableHead className="font-bold text-slate-800 hidden sm:table-cell">Date</TableHead>
-            {showActions && <TableHead className="text-right font-bold text-slate-800">Actions</TableHead>}
+            <TableHead className="font-bold text-slate-900">Report No</TableHead>
+            <TableHead className="font-bold text-slate-900 hidden md:table-cell">Type</TableHead>
+            <TableHead className="font-bold text-slate-900">Client / Project</TableHead>
+            <TableHead className="font-bold text-slate-900 hidden lg:table-cell">Inspector</TableHead>
+            <TableHead className="font-bold text-slate-900">Status</TableHead>
+            <TableHead className="font-bold text-slate-900 hidden sm:table-cell">Date</TableHead>
+            {showActions && <TableHead className="text-right font-bold text-slate-900">Actions</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -103,10 +106,10 @@ export const InspectionTable = ({
               style={{ animationDelay: `${index * 50}ms` }}
               onClick={() => navigate(getFormPath(inspection.inspection_type, inspection._id, inspection.formType))}
             >
-              <TableCell className="font-bold text-primary py-4">
+              <TableCell className="font-bold text-slate-900 py-4 whitespace-nowrap">
                 {inspection.report_no || inspection._id.slice(-6).toUpperCase()}
-                <p className="md:hidden text-[10px] text-muted-foreground font-normal mt-0.5 capitalize">
-                  {inspection.formType || inspection.inspection_type}
+                <p className="md:hidden text-[9px] text-muted-foreground font-black uppercase tracking-tighter mt-0.5">
+                  {inspection.formType?.replace(/-/g, ' ') || inspection.inspection_type?.replace(/_/g, ' ')}
                 </p>
               </TableCell>
               <TableCell className="hidden md:table-cell">
@@ -115,15 +118,15 @@ export const InspectionTable = ({
                 </Badge>
               </TableCell>
               <TableCell className="py-4">
-                <div className="max-w-[150px] sm:max-w-none">
-                  <p className="font-bold text-slate-900 truncate">{inspection.client_name}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{inspection.project_name || inspection.vendor_name || 'N/A'}</p>
+                <div className="max-w-[100px] xs:max-w-[140px] sm:max-w-none">
+                  <p className="font-black text-slate-900 truncate text-sm">{inspection.client_name}</p>
+                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground truncate">{inspection.project_name || inspection.vendor_name || 'N/A'}</p>
                 </div>
               </TableCell>
               <TableCell className="hidden lg:table-cell font-medium text-slate-600">{inspection.inspector_name}</TableCell>
               <TableCell>
                 <Badge className={cn(
-                  "rounded-full px-3 py-1 font-black text-[10px] uppercase",
+                  "rounded-full px-2 py-0.5 sm:px-3 sm:py-1 font-black text-[9px] sm:text-[10px] uppercase",
                   inspection.status === 'approved' ? "bg-green-100 text-green-700" :
                     inspection.status === 'pending' ? "bg-amber-100 text-amber-700" :
                       inspection.status === 'rejected' ? "bg-red-100 text-red-700" :
@@ -139,18 +142,14 @@ export const InspectionTable = ({
                 <TableCell className="text-right py-4" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(getFormPath(inspection.type, inspection._id, inspection.formType))}>
+                      <DropdownMenuItem onClick={() => navigate(getFormPath(inspection.inspection_type, inspection._id, inspection.formType))}>
                         <Eye className="mr-2 h-4 w-4" />
                         View
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(getFormPath(inspection.type, inspection._id, inspection.formType))}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={async () => {
                         try {
@@ -205,6 +204,25 @@ export const InspectionTable = ({
                         <Share2 className="mr-2 h-4 w-4" />
                         Share
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+                        onClick={async () => {
+                          if (window.confirm("Are you sure you want to delete this report? This action cannot be undone.")) {
+                            const loadingToast = toast.loading("Deleting report...");
+                            try {
+                              await api.delete(`/inspections/${inspection._id}`);
+                              toast.success("Report deleted successfully", { id: loadingToast });
+                              if (onRefresh) onRefresh();
+                            } catch (error) {
+                              console.error("Delete Error:", error);
+                              toast.error("Failed to delete report", { id: loadingToast });
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
                       {inspection.status === 'completed' && (
                         <>
                           <DropdownMenuItem className="text-success">
@@ -225,6 +243,6 @@ export const InspectionTable = ({
           ))}
         </TableBody>
       </Table>
-    </div>
+    </div >
   );
 };

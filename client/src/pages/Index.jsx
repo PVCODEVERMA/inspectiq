@@ -546,9 +546,9 @@ const Index = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/20 hover:bg-white/5 text-white px-8 h-12 rounded-full font-bold"
+                className="border-white/20 bg-white/5 text-white px-8 h-12 rounded-full font-bold"
               >
-                Contact Sales
+                Login
               </Button>
             </div>
           </div>
