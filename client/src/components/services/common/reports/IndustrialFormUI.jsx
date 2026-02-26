@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/layout/Header';
+import { useHeader } from '@/contexts/HeaderContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -70,6 +70,15 @@ export const IndustrialFormUI = ({
     handleSave,
 }) => {
     const navigate = useNavigate();
+    const { setPageInfo } = useHeader();
+
+    useEffect(() => {
+        setPageInfo(
+            pageTitle || formData.report_title || activeTemplate?.title,
+            `${activeTemplate?.subTitle ? activeTemplate.subTitle + ' Report' : 'New Report'}`
+        );
+    }, [setPageInfo, pageTitle, formData.report_title, activeTemplate?.title, activeTemplate?.subTitle]);
+
     const confirmDeletePhoto = (fieldId, index) => {
         toast((t) => (
             <div className="flex flex-col gap-3 p-1">
@@ -110,10 +119,6 @@ export const IndustrialFormUI = ({
     return (
         <>
             <div className="min-h-screen bg-slate-50/50 pb-32">
-                <Header
-                    title={pageTitle || formData.report_title || activeTemplate?.title}
-                    subtitle={`${activeTemplate?.subTitle ? activeTemplate.subTitle + ' Report' : 'New Report'}`}
-                />
 
                 <div className="max-w-7xl mx-auto p-2 sm:p-6 space-y-4 sm:space-y-8 animate-in fade-in duration-500">
                     {activeTemplate?.steps?.map((step) => (

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Header } from '@/components/layout/Header';
+import { useHeader } from '@/contexts/HeaderContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,15 +13,35 @@ import {
     FileSearch,
     ChevronRight,
     Search,
-    FileSearch as FileSearchIcon
+    FileSearch as FileSearchIcon,
+    XCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { industrialReportTypes } from '@/data/industrialReportTypes';
+import { useVoiceSearch } from '@/hooks/useVoiceSearch';
 
 const BaseIndustrialNewSelection = () => {
     const { id, serviceType } = useParams();
     const navigate = useNavigate();
+    const { setHeader } = useHeader();
     const [searchTerm, setSearchTerm] = React.useState('');
+
+    const handleTranscript = useCallback((transcript) => {
+        setSearchTerm(transcript);
+    }, []);
+
+    const { isListening, isTranslating, toggleListening, isSupported } = useVoiceSearch(handleTranscript);
+
+    useEffect(() => {
+        setHeader({
+            title: "Create New Report",
+            subtitle: `Select the type of ${serviceType} report you want to generate`,
+            showSearch: true,
+            searchValue: searchTerm,
+            onSearchChange: setSearchTerm,
+            searchPlaceholder: "Search report types..."
+        });
+    }, [setHeader, serviceType, searchTerm]);
 
     const normalizedServiceType = (serviceType || '').toLowerCase() === 'tpi' ? 'third-party-inspection' : serviceType;
     const specificTypes = industrialReportTypes[normalizedServiceType] || industrialReportTypes[serviceType] || [];
@@ -36,21 +56,50 @@ const BaseIndustrialNewSelection = () => {
 
     return (
         <div className="min-h-screen bg-background/50 pb-12">
-            <Header
-                title="Create New Report"
-                subtitle={`Select the type of ${serviceType} report you want to generate`}
-            />
 
             <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
-                <div className="flex justify-end">
-                    <div className="relative w-full md:w-96">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <Input
-                            placeholder="Search report types..."
-                            className="rounded-2xl pl-10 h-12 bg-white border-none shadow-sm focus:ring-2 focus:ring-primary/20"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                <div className="flex justify-end md:hidden">
+                    <div className="relative w-full">
+                        <div className="searchbar max-w-none h-11 border-none shadow-sm bg-white focus-within:ring-2 focus-within:ring-primary/20 rounded-2xl overflow-hidden">
+                            <div className="searchbar-wrapper px-3">
+                                <div className="searchbar-left pr-2">
+                                    <Search className="w-4 h-4 text-slate-400" />
+                                </div>
+                                <div className="searchbar-center">
+                                    <input
+                                        placeholder="Search report types..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="searchbar-input text-slate-700 text-sm placeholder:text-slate-400 h-full w-full bg-transparent outline-none"
+                                    />
+                                </div>
+                                <div className="searchbar-right gap-1 flex items-center bg-white">
+                                    {(searchTerm) && (
+                                        <XCircle
+                                            className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-600 mr-2"
+                                            onClick={() => setSearchTerm('')}
+                                        />
+                                    )}
+                                    {isSupported && (
+                                        <button
+                                            onClick={() => toggleListening('hi-IN')}
+                                            className={cn(
+                                                "p-1.5 rounded-full transition-all",
+                                                isListening ? "bg-red-50 text-red-500 animate-pulse shadow-inner" :
+                                                    isTranslating ? "bg-amber-50 text-amber-500 animate-bounce shadow-inner" : "text-primary bg-primary/10 hover:bg-primary/20"
+                                            )}
+                                        >
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                                <line x1="12" y1="19" x2="12" y2="23" />
+                                                <line x1="8" y1="23" x2="16" y2="23" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
