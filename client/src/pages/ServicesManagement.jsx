@@ -1,8 +1,8 @@
-import  { useState, useEffect } from 'react';
-import { Header } from '@/components/layout/Header';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSidebar } from '@/contexts/SidebarContext';
+import { useHeader } from '@/contexts/HeaderContext';
 import {
     Boxes,
     ChevronRight,
@@ -14,9 +14,14 @@ import { toast } from 'react-hot-toast';
 const ServicesManagement = () => {
     const navigate = useNavigate();
     const { searchQuery } = useSidebar();
+    const { setPageInfo } = useHeader();
     const [services, setServices] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isFiltering, setIsFiltering] = useState(false);
+
+    useEffect(() => {
+        setPageInfo("Service Management", "Select a module to manage inspections and metrics");
+    }, [setPageInfo]);
 
     const fetchServices = async () => {
         setIsLoading(true);
@@ -58,10 +63,6 @@ const ServicesManagement = () => {
 
     return (
         <div className="min-h-screen bg-background pb-12">
-            <Header
-                title="Service Management"
-                subtitle="Select a module to manage inspections and metrics"
-            />
 
             <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
                 <div className="flex justify-between items-center bg-white/40 backdrop-blur-sm p-4 rounded-[2rem] border-2 border-slate-100 shadow-sm animate-in fade-in slide-in-from-top-3 duration-500">

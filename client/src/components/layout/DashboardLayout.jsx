@@ -22,7 +22,7 @@ export const DashboardLayout = () => {
         )}
       >
         <Header />
-        <main className="flex-1 min-h-0">
+        <main className="flex-1 min-h-0 mb-32">
           <Suspense fallback={<PageSkeleton />}>
             <Outlet />
           </Suspense>

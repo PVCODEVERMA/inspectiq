@@ -365,7 +365,7 @@ const BaseIndustrialDashboard = () => {
             </div>
 
             {/* Bottom Section */}
-            <div className="max-w-3xl mb-34">
+            <div className="max-w-3xl mb-32">
                 <Card className="rounded-[2.5rem] border-none shadow-premium bg-white p-5 sm:p-8">
                     <CardHeader className="px-0 pt-0 pb-6">
                         <CardTitle className="text-xl font-black">Quick Actions</CardTitle>
