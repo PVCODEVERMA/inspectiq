@@ -3,7 +3,28 @@ import { toast } from 'react-hot-toast';
 
 export const useVoiceSearch = (onTranscript) => {
     const [isListening, setIsListening] = useState(false);
+    const [isTranslating, setIsTranslating] = useState(false);
     const recognitionRef = useRef(null);
+
+    const translateToEnglish = async (text) => {
+        if (!text || !/[^\x00-\x7F]/.test(text)) return text; // If purely English-like, skip translation
+
+        try {
+            setIsTranslating(true);
+            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=hi|en`);
+            const data = await response.json();
+            setIsTranslating(false);
+
+            if (data.responseData && data.responseData.translatedText) {
+                return data.responseData.translatedText;
+            }
+            return text;
+        } catch (error) {
+            console.error('Translation error:', error);
+            setIsTranslating(false);
+            return text;
+        }
+    };
 
     useEffect(() => {
         // Check for browser support
@@ -17,19 +38,22 @@ export const useVoiceSearch = (onTranscript) => {
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = false;
-        // Support English (India) and Hindi (India)
-        recognition.lang = 'en-IN'; // Default to English, can be toggled if needed
+        recognition.lang = 'hi-IN'; // Default to Hindi to capture it accurately
 
         recognition.onstart = () => {
             setIsListening(true);
         };
 
-        recognition.onresult = (event) => {
+        recognition.onresult = async (event) => {
             const transcript = event.results[0][0].transcript;
-            if (onTranscript) {
-                onTranscript(transcript);
-            }
             setIsListening(false);
+
+            // Always translate to English as requested
+            const translatedText = await translateToEnglish(transcript);
+
+            if (onTranscript) {
+                onTranscript(translatedText);
+            }
         };
 
         recognition.onerror = (event) => {
@@ -58,7 +82,7 @@ export const useVoiceSearch = (onTranscript) => {
         };
     }, [onTranscript]);
 
-    const startListening = useCallback((lang = 'en-IN') => {
+    const startListening = useCallback((lang = 'hi-IN') => {
         if (!recognitionRef.current) {
             toast.error('Voice search is not supported in your browser.');
             return;
@@ -69,7 +93,6 @@ export const useVoiceSearch = (onTranscript) => {
             recognitionRef.current.start();
         } catch (error) {
             console.error('Recognition start error:', error);
-            // If already started, just ignore
         }
     }, []);
 
@@ -79,7 +102,7 @@ export const useVoiceSearch = (onTranscript) => {
         }
     }, []);
 
-    const toggleListening = useCallback((lang = 'en-IN') => {
+    const toggleListening = useCallback((lang = 'hi-IN') => {
         if (isListening) {
             stopListening();
         } else {
@@ -89,6 +112,7 @@ export const useVoiceSearch = (onTranscript) => {
 
     return {
         isListening,
+        isTranslating,
         startListening,
         stopListening,
         toggleListening,
