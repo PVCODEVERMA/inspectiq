@@ -10,9 +10,9 @@ export const Footer = () => {
             <div className="absolute top-0 right-0 w-96 h-96 bg-[#000000] rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
 
             <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
                     {/* Brand Section */}
-                    <div className="space-y-6">
+                    <div className="space-y-6 col-span-2 lg:col-span-1">
                         <div className="flex items-center gap-3">
                             <img src={logo} alt="Quality Concept Welding Solutions" className="w-12 h-12 rounded-xl bg-white p-1" />
                             <div className="text-sidebar-foreground">
@@ -78,20 +78,20 @@ export const Footer = () => {
                     </div>
 
                     {/* Contact Section */}
-                    <div className="space-y-6">
+                    <div className="space-y-6 col-span-2 lg:col-span-1">
                         <h3 className="font-display font-bold text-sidebar-foreground uppercase tracking-widest text-xs">Contact Us</h3>
                         <ul className="space-y-4">
                             <li className="flex gap-3 text-sm text-sidebar-foreground/60">
                                 <MapPin className="w-5 h-5 text-primary shrink-0" />
-                                <span>Suite 101, Business District,<br />City Center, India</span>
+                                <span>Office:- 222, OAK Tower, Paramount Golfmart, near Tilipta Circle, UPSIDC Site C, Zeta II, Greater Noida, UP 201306</span>
                             </li>
                             <li className="flex items-center gap-3 text-sm text-sidebar-foreground/60">
                                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                                <span>+91 98765 43210</span>
+                                <span>+91 98910 26664 / 85001</span>
                             </li>
                             <li className="flex items-center gap-3 text-sm text-sidebar-foreground/60">
                                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                                <span>support@qualityconcept.in</span>
+                                <span>info@qualityconcept.in</span>
                             </li>
                         </ul>
                     </div>
