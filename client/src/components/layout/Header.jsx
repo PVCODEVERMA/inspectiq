@@ -27,9 +27,21 @@ import {
   XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useVoiceSearch } from '@/hooks/useVoiceSearch';
+import { useHeader } from '@/contexts/HeaderContext';
 
-export const Header = ({ title, shortTitle, subtitle, showSearch = true, searchValue, onSearchChange, searchPlaceholder }) => {
+export const Header = (props) => {
+  const context = useHeader();
+  // Merge props and context
+  const {
+    title,
+    shortTitle,
+    subtitle,
+    showSearch,
+    searchValue,
+    onSearchChange,
+    searchPlaceholder,
+  } = { ...context, ...props };
+
   const { profile, signOut, role } = useAuth();
   const { toggleMobileSidebar, isSearchOpen, setIsSearchOpen, searchQuery, setSearchQuery, toggleSearch } = useSidebar();
   const navigate = useNavigate();
@@ -38,10 +50,12 @@ export const Header = ({ title, shortTitle, subtitle, showSearch = true, searchV
   const handleTranscript = useCallback((transcript) => {
     if (onSearchChange) {
       onSearchChange(transcript);
+    } else if (context.onSearchChange) {
+      context.onSearchChange(transcript);
     } else {
       setSearchQuery(transcript);
     }
-  }, [onSearchChange, setSearchQuery]);
+  }, [onSearchChange, context.onSearchChange, setSearchQuery]);
 
   const { isListening, isTranslating, toggleListening, isSupported } = useVoiceSearch(handleTranscript);
 

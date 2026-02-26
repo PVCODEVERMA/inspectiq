@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { lazy, Suspense } from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { HeaderProvider } from "@/contexts/HeaderContext";
 
 // --- Lazy Loading Page Components ---
 const Index = lazy(() => import("./pages/Index"));
@@ -64,57 +65,59 @@ const App = () => (
           <SidebarProvider>
             <TooltipProvider>
               <Toaster position="top-center" reverseOrder={false} />
-              <Suspense fallback={null}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/login" element={<AuthPage />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/booking" element={<Contact />} />
-                  <Route path="/consultation" element={<Contact />} />
+              <HeaderProvider>
+                <Suspense fallback={null}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/login" element={<AuthPage />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/booking" element={<Contact />} />
+                    <Route path="/consultation" element={<Contact />} />
 
-                  {/* Dashboard Routes with Layout - Protected */}
-                  <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/admin" element={<SuperAdminDashboard />} />
-                    <Route path="/admin/company-profile" element={<CompanyProfile />} />
-                    <Route path="/admin/members/:id" element={<MemberProfilePage />} />
-                    <Route path="/key-generation" element={<KeyGeneration />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
-                    <Route path="/inspections" element={<InspectionsPage />} />
-                    <Route path="/companies" element={<CompaniesPage />} />
-                    <Route path="/inspectors" element={<InspectorsPage />} />
-                    <Route path="/members/new" element={<AddMemberPage />} />
-                    <Route path="/vendors" element={<VendorsPage />} />
-                    <Route path="/reports" element={<ReportsPage />} />
-                    <Route path="/form-builder" element={<FormBuilderPage />} />
-                    <Route path="/analytics" element={<AnalyticsPage />} />
-                    <Route path="/inspections/new" element={<CreateInspectionPage />} />
+                    {/* Dashboard Routes with Layout - Protected */}
+                    <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/admin" element={<SuperAdminDashboard />} />
+                      <Route path="/admin/company-profile" element={<CompanyProfile />} />
+                      <Route path="/admin/members/:id" element={<MemberProfilePage />} />
+                      <Route path="/key-generation" element={<KeyGeneration />} />
+                      <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="/notifications" element={<NotificationsPage />} />
+                      <Route path="/inspections" element={<InspectionsPage />} />
+                      <Route path="/companies" element={<CompaniesPage />} />
+                      <Route path="/inspectors" element={<InspectorsPage />} />
+                      <Route path="/members/new" element={<AddMemberPage />} />
+                      <Route path="/vendors" element={<VendorsPage />} />
+                      <Route path="/reports" element={<ReportsPage />} />
+                      <Route path="/form-builder" element={<FormBuilderPage />} />
+                      <Route path="/analytics" element={<AnalyticsPage />} />
+                      <Route path="/inspections/new" element={<CreateInspectionPage />} />
 
-                    {/* Global Dynamic Industrial Services */}
-                    <Route path="/admin/services/:id/:serviceType" element={<BaseIndustrialDashboard />} />
-                    <Route path="/admin/services/:id/:serviceType/new" element={<ReportDispatcher />} />
-                    <Route path="/admin/services/:id/:serviceType/edit/:inspectionId" element={<ReportDispatcher />} />
-                    <Route path="/admin/services/:id/:serviceType/reports" element={<BaseIndustrialReports />} />
-                    <Route path="/admin/services/:id/:serviceType/new/selection" element={<BaseIndustrialNewSelection />} />
+                      {/* Global Dynamic Industrial Services */}
+                      <Route path="/admin/services/:id/:serviceType" element={<BaseIndustrialDashboard />} />
+                      <Route path="/admin/services/:id/:serviceType/new" element={<ReportDispatcher />} />
+                      <Route path="/admin/services/:id/:serviceType/edit/:inspectionId" element={<ReportDispatcher />} />
+                      <Route path="/admin/services/:id/:serviceType/reports" element={<BaseIndustrialReports />} />
+                      <Route path="/admin/services/:id/:serviceType/new/selection" element={<BaseIndustrialNewSelection />} />
 
 
-                    <Route path="/services/industrial-inspection/ndt-services/:inspectionId/edit" element={<ReportDispatcher />} />
-                    <Route path="/services/industrial-inspection/:serviceType/:inspectionId/edit" element={<ReportDispatcher />} />
+                      <Route path="/services/industrial-inspection/ndt-services/:inspectionId/edit" element={<ReportDispatcher />} />
+                      <Route path="/services/industrial-inspection/:serviceType/:inspectionId/edit" element={<ReportDispatcher />} />
 
-                    <Route path="/admin/services" element={<ServicesManagement />} />
-                    <Route path="/admin/clients" element={<ClientManagement />} />
-                    <Route path="/admin/clients/new" element={<AddClientPage />} />
-                    <Route path="/admin/clients/:id/edit" element={<EditClientPage />} />
-                    <Route path="/admin/clients/:id" element={<ClientDetailDashboard />} />
-                  </Route>
+                      <Route path="/admin/services" element={<ServicesManagement />} />
+                      <Route path="/admin/clients" element={<ClientManagement />} />
+                      <Route path="/admin/clients/new" element={<AddClientPage />} />
+                      <Route path="/admin/clients/:id/edit" element={<EditClientPage />} />
+                      <Route path="/admin/clients/:id" element={<ClientDetailDashboard />} />
+                    </Route>
 
-                  {/* Public Routes */}
-                  <Route path="/verify/:token" element={<VerifyReport />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+                    {/* Public Routes */}
+                    <Route path="/verify/:token" element={<VerifyReport />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </HeaderProvider>
             </TooltipProvider>
           </SidebarProvider>
         </BrowserRouter>
