@@ -41,13 +41,13 @@ import api from '@/lib/api';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths } from 'date-fns';
+import { useInspectionsQuery } from '@/hooks/queryHooks';
+import { useLoadingDelay } from '@/hooks/useLoadingDelay';
 
 const BaseIndustrialDashboard = () => {
     const { id, serviceType } = useParams();
     const navigate = useNavigate();
     const [service, setService] = useState(null);
-    const [inspections, setInspections] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [isNavigating, setIsNavigating] = useState(false);
@@ -57,49 +57,21 @@ const BaseIndustrialDashboard = () => {
         navigate(`/admin/services/${id}/${serviceType}/reports?status=${status}`);
     };
 
-    const fetchData = async () => {
-        setIsLoading(true);
-        try {
-            // Fetch Service Details
-            const serviceRes = await api.get(`/services/details/${id}`);
-            setService(serviceRes.data);
+    const { data: inspections = [], isLoading: isQueryLoading, error } = useInspectionsQuery(id);
+    const showSkeleton = useLoadingDelay(isQueryLoading, 300);
 
-            // Fetch All Inspection Types in Parallel
-            const endpoints = [
-                '/ndt/liquid-penetrant',
-                '/inspections',
-                '/ndt/ultrasonic',
-                '/ndt/magnetic-particle',
-                '/ndt/summary'
-            ];
-
-            const results = await Promise.all(
-                endpoints.map(ep =>
-                    api.get(`${ep}?serviceId=${id}`)
-                        .then(res => res.data.map(item => ({ ...item, _endpoint: ep }))) // Tag source
-                        .catch(err => {
-                            console.warn(`Failed to fetch from ${ep}`, err);
-                            return [];
-                        })
-                )
-            );
-
-            // Combine and Sort by Date
-            const allInspections = results.flat().sort((a, b) =>
-                new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
-            );
-
-            setInspections(allInspections);
-        } catch (error) {
-            console.error(`Error fetching ${serviceType} service data:`, error);
-            toast.error(`Failed to load ${serviceType} dashboard`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+    // Fetch Service Details (Keeping this simple for now, but could also be a query)
     useEffect(() => {
-        if (id) fetchData();
+        const fetchService = async () => {
+            if (!id) return;
+            try {
+                const serviceRes = await api.get(`/services/details/${id}`);
+                setService(serviceRes.data);
+            } catch (err) {
+                console.error("Error fetching service details:", err);
+            }
+        };
+        fetchService();
     }, [id]);
 
     const filteredInspections = useMemo(() => {
@@ -149,7 +121,7 @@ const BaseIndustrialDashboard = () => {
         });
     }, [inspections]);
 
-    if (isLoading || isNavigating) {
+    if (showSkeleton || isNavigating) {
         return (
             <div className="min-h-screen bg-background/50 pb-12">
                 {/* Header visible during loading */}
