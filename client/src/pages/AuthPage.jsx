@@ -187,7 +187,7 @@ const AuthPage = () => {
           </Button>
         </div>
 
-        <div className="flex-1 flex items-center justify-center p-6 md:p-12">
+        <div className="flex-1 flex items-start md:items-center justify-center pt-8 px-6 pb-6 md:p-12 overflow-y-auto">
           <div className="w-full max-w-[440px] space-y-4 animate-slide-up">
             <div className="space-y-2">
               {/* <h3 className="text-2xl font-display font-black text-foreground tracking-tight">
@@ -342,7 +342,7 @@ const AuthPage = () => {
                       <Label className="text-[10px] font-bold uppercase ml-1 opacity-60">Email</Label>
                       <Input
                         type="email"
-                        placeholder="admin@it.com"
+                        placeholder="Enter your email"
                         value={masterRegData.email}
                         onChange={(e) => setMasterRegData({ ...masterRegData, email: e.target.value })}
                         required

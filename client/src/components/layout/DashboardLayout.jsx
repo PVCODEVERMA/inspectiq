@@ -12,20 +12,24 @@ export const DashboardLayout = () => {
   const { isCollapsed } = useSidebar();
 
   return (
-    <div className="h-screen overflow-hidden bg-background">
+    <div className="h-[100dvh] overflow-hidden bg-background">
       <Sidebar />
       <div
         className={cn(
-          'transition-all duration-300 h-screen overflow-y-auto pb-16 lg:pb-0 flex flex-col',
+          'transition-all duration-300 h-[100dvh] flex flex-col',
           isCollapsed ? 'lg:ml-20' : 'lg:ml-72',
           'ml-0' // No margin on mobile
         )}
       >
         <Header />
-        <main className="flex-1 min-h-0 pb-28 lg:pb-0">
-          <Suspense fallback={<PageSkeleton />}>
-            <Outlet />
-          </Suspense>
+        <main className="flex-1 min-h-0 overflow-y-auto w-full relative">
+          <div className="flex flex-col min-h-full">
+            <Suspense fallback={<PageSkeleton />}>
+              <Outlet />
+            </Suspense>
+            {/* Foolproof invisible spacer block that guarantees space at the very bottom of the scrolled page content */}
+            <div className="h-32 shrink-0 w-full" aria-hidden="true" />
+          </div>
         </main>
       </div>
       <MobileNav />
