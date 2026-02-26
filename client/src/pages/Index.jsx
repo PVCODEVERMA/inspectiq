@@ -239,14 +239,11 @@ const Index = () => {
       </nav>
 
       {/* HERO SECTION */}
-      <section className="relative pt-32 sm:pt-40 pb-16 sm:pb-24 px-4 sm:px-6">
+      <section className="relative pt-[20%] sm:pt-40 pb-16 sm:pb-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="hero-content reveal">
-              <div className="inline-flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 mb-6">
-                <Zap className="w-4 h-4 text-[#ED3237]" />
-
-              </div>
+             
 
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
                 <span className="text-white">Enterprise</span>
