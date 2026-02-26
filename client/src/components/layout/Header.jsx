@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useHeader } from '@/contexts/HeaderContext';
+import { useVoiceSearch } from '@/hooks/useVoiceSearch';
 
 export const Header = (props) => {
   const context = useHeader();
