@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/layout/Header';
+import { useHeader } from '@/contexts/HeaderContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast';
 
 const AddClientPage = () => {
     const navigate = useNavigate();
+    const { setPageInfo } = useHeader();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -25,6 +26,10 @@ const AddClientPage = () => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
+
+    useEffect(() => {
+        setPageInfo('Register New Client', 'Add a new company to your inspection network');
+    }, [setPageInfo]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -45,10 +50,6 @@ const AddClientPage = () => {
 
     return (
         <div className="min-h-screen bg-background/50 pb-12">
-            <Header
-                title="Register New Client"
-                subtitle="Add a new company to your inspection network"
-            />
 
             <div className="p-4 sm:p-6 max-w-[1600px] mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex items-center justify-between">

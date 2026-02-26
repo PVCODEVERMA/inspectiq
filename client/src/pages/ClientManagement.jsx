@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/layout/Header';
+import { useHeader } from '@/contexts/HeaderContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -23,6 +23,7 @@ const ClientManagement = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [clients, setClients] = useState([]);
     const navigate = useNavigate();
+    const { setPageInfo } = useHeader();
 
     const fetchClients = async () => {
         setIsLoading(true);
@@ -41,6 +42,10 @@ const ClientManagement = () => {
         fetchClients();
     }, []);
 
+    useEffect(() => {
+        setPageInfo('Client Management', 'Manage your client companies and their details');
+    }, [setPageInfo]);
+
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this client?')) return;
 
@@ -56,10 +61,6 @@ const ClientManagement = () => {
 
     return (
         <div className="min-h-screen bg-background pb-12">
-            <Header
-                title="Client Management"
-                subtitle="Manage your client companies and their details"
-            />
 
             <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
                 <div className="flex justify-end">

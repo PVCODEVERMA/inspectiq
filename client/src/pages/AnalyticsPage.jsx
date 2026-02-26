@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/layout/Header';
 import { useSidebar } from '@/contexts/SidebarContext';
+import { useHeader } from '@/contexts/HeaderContext';
 import { cn } from '@/lib/utils';
 import {
   Heart,
@@ -23,6 +23,11 @@ import { formatDistanceToNow } from 'date-fns';
 const ActivityPage = () => {
   const navigate = useNavigate();
   const { favorites, history, toggleFavorite, setHistory } = useSidebar();
+  const { setPageInfo } = useHeader();
+
+  useEffect(() => {
+    setPageInfo('Activity & Favorites', 'Your personalized workspace shortcuts and history');
+  }, [setPageInfo]);
 
   const clearHistory = () => {
     setHistory([]);
@@ -39,11 +44,6 @@ const ActivityPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F6F7F8]">
-      <Header
-        title="Activity & Favorites"
-        subtitle="Your personalized workspace shortcuts and history"
-      />
-
       <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
 
         {/* Favorites / Pinned Section */}

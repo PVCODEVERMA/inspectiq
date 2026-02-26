@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Header } from '@/components/layout/Header';
+import { useHeader } from '@/contexts/HeaderContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,7 @@ import { toast } from 'react-hot-toast';
 const EditClientPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { setPageInfo } = useHeader();
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
@@ -48,6 +49,10 @@ const EditClientPage = () => {
         if (id) fetchClient();
     }, [id, navigate]);
 
+    useEffect(() => {
+        setPageInfo('Edit Client Details', `Updating information for ${formData.name || 'Client'}`);
+    }, [setPageInfo, formData.name]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -81,10 +86,6 @@ const EditClientPage = () => {
 
     return (
         <div className="min-h-screen bg-background/50 pb-12">
-            <Header
-                title="Edit Client Details"
-                subtitle={`Updating information for ${formData.name}`}
-            />
 
             <div className="p-4 sm:p-6 max-w-[1600px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex items-center justify-between">

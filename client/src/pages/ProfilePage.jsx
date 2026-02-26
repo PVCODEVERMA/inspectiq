@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Header } from '@/components/layout/Header';
+import { useHeader } from '@/contexts/HeaderContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,8 +15,13 @@ import { getFileUrl } from '@/lib/utils';
 const ProfilePage = () => {
     const navigate = useNavigate();
     const { user, profile, updateAvatar } = useAuth();
+    const { setPageInfo } = useHeader();
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false);
+
+    useEffect(() => {
+        setPageInfo("My Profile", "Manage your account settings and profile picture");
+    }, [setPageInfo]);
 
     const handleFileChange = async (e) => {
         const file = e.target.files?.[0];
@@ -44,7 +49,6 @@ const ProfilePage = () => {
 
     return (
         <div className="min-h-screen bg-background pb-12">
-            <Header title="My Profile" subtitle="Manage your account settings and profile picture" />
 
             <main className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6">
                 <div className="flex flex-col lg:flex-row gap-6 items-start">
