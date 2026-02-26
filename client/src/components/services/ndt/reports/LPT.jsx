@@ -495,7 +495,31 @@ const LPT = () => {
                         <Button variant="outline" size="lg" className="h-14 px-8 rounded-2xl border-2 hover:bg-[#F44034] text-[#F44034] gap-2 font-bold order-2 sm:order-1" onClick={() => navigate(-1)}><ChevronLeft className="w-5 h-5" /> Back</Button>
                         <div className="flex gap-2 order-1 sm:order-2 flex-1">
                             <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] hover:text-white" onClick={() => handleSave(true, 'print')} disabled={isLoading}><Printer className="w-5 h-5" /></Button>
-                            <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] hover:text-white gap-2 font-bold" onClick={() => handleSave(true, 'download')} disabled={isLoading}><Download className="w-5 h-5" /> Generate PDF</Button>
+                            <div className="download-container">
+                                <label className={cn("download-btn shadow-sm transition-all shrink-0", isLoading && "is-loading")}>
+                                    <input type="checkbox" className="download-input" checked={isLoading} readOnly />
+                                    <span className="download-circle">
+                                        <svg
+                                            className="download-icon"
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="1.5"
+                                                d="M12 19V5m0 14-4-4m4 4 4-4"
+                                            ></path>
+                                        </svg>
+                                        <div className="download-square"></div>
+                                    </span>
+                                    <p className="download-title" onClick={() => handleSave(true, 'download')}>Generate PDF</p>
+                                    <p className="download-title">Open PDF</p>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>

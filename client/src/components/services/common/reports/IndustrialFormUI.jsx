@@ -342,14 +342,31 @@ export const IndustrialFormUI = ({
                                 <Printer className="w-5 h-5" />
                             </Button>
 
-                            <Button variant="outline" className="h-12 sm:h-14 px-4 sm:px-8 rounded-2xl border-2 border-slate-200 hover:bg-[#201E1E] hover:text-white gap-2 font-bold transition-all shadow-sm shrink-0" onClick={() => handleSave(true, 'download')} disabled={isLoading}>
-                                {isLoading ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                ) : (
-                                    <Download className="w-5 h-5" />
-                                )}
-                                <span>{isLoading ? "Generating..." : "Generate PDF"}</span>
-                            </Button>
+                            <div className="download-container">
+                                <label className={cn("download-btn shadow-sm transition-all shrink-0", isLoading && "is-loading")}>
+                                    <input type="checkbox" className="download-input" checked={isLoading} readOnly />
+                                    <span className="download-circle">
+                                        <svg
+                                            className="download-icon"
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="1.5"
+                                                d="M12 19V5m0 14-4-4m4 4 4-4"
+                                            ></path>
+                                        </svg>
+                                        <div className="download-square"></div>
+                                    </span>
+                                    <p className="download-title" onClick={() => handleSave(true, 'download')}>Generate</p>
+                                    <p className="download-title">Open PDF</p>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>

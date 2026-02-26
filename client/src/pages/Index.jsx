@@ -227,13 +227,26 @@ const Index = () => {
             >
               About
             </Button>
-            <Button
+            <button
               onClick={() => navigate("/auth")}
-              className="bg-[#ED3237] hover:bg-[#ED3237]/90 text-white px-4 sm:px-6 h-9 sm:h-10 rounded-full text-sm font-bold relative group overflow-hidden"
+              className="user-profile"
+              aria-label="User Login Button"
             >
-              <span className="relative z-10">Login</span>
-              <div className="absolute inset-0 bg-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform"></div>
-            </Button>
+              <div className="user-profile-inner">
+                <svg
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <g data-name="Layer 2" id="Layer_2">
+                    <path
+                      d="m15.626 11.769a6 6 0 1 0 -7.252 0 9.008 9.008 0 0 0 -5.374 8.231 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 9.008 9.008 0 0 0 -5.374-8.231zm-7.626-4.769a4 4 0 1 1 4 4 4 4 0 0 1 -4-4zm10 14h-12a1 1 0 0 1 -1-1 7 7 0 0 1 14 0 1 1 0 0 1 -1 1z"
+                    ></path>
+                  </g>
+                </svg>
+                <p>Log In</p>
+              </div>
+            </button>
           </div>
         </div>
       </nav>
@@ -243,7 +256,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="hero-content reveal">
-             
+
 
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
                 <span className="text-white">Enterprise</span>
@@ -540,13 +553,26 @@ const Index = () => {
                 Go to Dashboard
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/20 bg-white/5 text-white px-8 h-12 rounded-full font-bold"
+              <button
+                onClick={() => navigate("/auth")}
+                className="user-profile"
+                aria-label="User Login Button"
               >
-                Login
-              </Button>
+                <div className="user-profile-inner">
+                  <svg
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <g data-name="Layer 2" id="Layer_2">
+                      <path
+                        d="m15.626 11.769a6 6 0 1 0 -7.252 0 9.008 9.008 0 0 0 -5.374 8.231 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 9.008 9.008 0 0 0 -5.374-8.231zm-7.626-4.769a4 4 0 1 1 4 4 4 4 0 0 1 -4-4zm10 14h-12a1 1 0 0 1 -1-1 7 7 0 0 1 14 0 1 1 0 0 1 -1 1z"
+                      ></path>
+                    </g>
+                  </svg>
+                  <p>Log In</p>
+                </div>
+              </button>
             </div>
           </div>
         </div>
