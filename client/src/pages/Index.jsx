@@ -227,8 +227,11 @@ const Index = () => {
             >
               About
             </Button>
-            <button
+            <div
               onClick={() => navigate("/auth")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate("/auth")}
               className="user-profile"
               aria-label="User Login Button"
             >
@@ -246,7 +249,7 @@ const Index = () => {
                 </svg>
                 <p>Log In</p>
               </div>
-            </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -553,8 +556,11 @@ const Index = () => {
                 Go to Dashboard
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
-              <button
+              <div
                 onClick={() => navigate("/auth")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && navigate("/auth")}
                 className="user-profile"
                 aria-label="User Login Button"
               >
@@ -572,7 +578,7 @@ const Index = () => {
                   </svg>
                   <p>Log In</p>
                 </div>
-              </button>
+              </div>
             </div>
           </div>
         </div>

@@ -77,7 +77,7 @@ export const Header = ({ title, shortTitle, subtitle, showSearch = true, searchV
                   <div className="searchbar-center">
                     <input
                       autoFocus
-                      placeholder={searchPlaceholder || "Search..."}
+                      placeholder="Search..."
                       value={searchValue !== undefined ? searchValue : searchQuery}
                       onChange={onSearchChange ? (e) => onSearchChange(e.target.value) : (e) => setSearchQuery(e.target.value)}
                       className="searchbar-input text-white text-xs placeholder:text-white/40 h-full"
@@ -158,49 +158,39 @@ export const Header = ({ title, shortTitle, subtitle, showSearch = true, searchV
 
         {/* Notifications */}
         <div className="flex items-center">
-          {/* Mobile Bell: Link to Dashboard */}
-          <button
+          {/* Mobile Bell: Link to Notifications */}
+          <div
             className="bell-button relative md:hidden"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/notifications')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/notifications')}
           >
             <svg viewBox="0 0 448 512" className="bell-icon">
               <path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z" />
             </svg>
             <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-xs shadow-md border-2 border-primary">
-              3
+              1
             </Badge>
-          </button>
+          </div>
 
-          {/* Desktop Bell: Dropdown Menu */}
+          {/* Desktop Bell: Link to Notifications */}
           <div className="hidden md:block">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div className="bell-button relative group cursor-pointer overflow-visible">
-                  <svg viewBox="0 0 448 512" className="bell-icon">
-                    <path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z" />
-                  </svg>
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-xs shadow-md border-2 border-primary">
-                    3
-                  </Badge>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={8} className="w-80 p-2">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
-                  <p className="font-medium">New inspection assigned</p>
-                  <p className="text-xs text-muted-foreground">Heat Exchanger Inspection - HE-2024-008</p>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
-                  <p className="font-medium">Inspection approved</p>
-                  <p className="text-xs text-muted-foreground">PSI-2024-045 has been approved</p>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex flex-col items-start gap-1 cursor-pointer hover:bg-[#373435] hover:text-white focus:bg-[#373435] focus:text-white">
-                  <p className="font-medium">AI Alert</p>
-                  <p className="text-xs text-muted-foreground">Missing photos detected in VCA-2024-012</p>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div
+              className="bell-button relative group cursor-pointer overflow-visible"
+              onClick={() => navigate('/notifications')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('/notifications')}
+              title="Notifications"
+            >
+              <svg viewBox="0 0 448 512" className="bell-icon">
+                <path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z" />
+              </svg>
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-xs shadow-md border-2 border-primary">
+                1
+              </Badge>
+            </div>
           </div>
         </div>
 
