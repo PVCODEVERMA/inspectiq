@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSidebar } from '@/contexts/SidebarContext';
@@ -27,13 +27,23 @@ import {
   XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
+import { useVoiceSearch } from '@/hooks/useVoiceSearch';
 
 export const Header = ({ title, shortTitle, subtitle, showSearch = true, searchValue, onSearchChange, searchPlaceholder }) => {
   const { profile, signOut, role } = useAuth();
   const { toggleMobileSidebar, isSearchOpen, setIsSearchOpen, searchQuery, setSearchQuery, toggleSearch } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleTranscript = useCallback((transcript) => {
+    if (onSearchChange) {
+      onSearchChange(transcript);
+    } else {
+      setSearchQuery(transcript);
+    }
+  }, [onSearchChange, setSearchQuery]);
+
+  const { isListening, toggleListening, isSupported } = useVoiceSearch(handleTranscript);
 
   const isFormRoute =
     location.pathname.includes('/new') ||
@@ -83,7 +93,23 @@ export const Header = ({ title, shortTitle, subtitle, showSearch = true, searchV
                       className="searchbar-input text-white text-xs placeholder:text-white/40 h-full"
                     />
                   </div>
-                  <div className="searchbar-right gap-1">
+                  <div className="searchbar-right gap-1 flex items-center">
+                    {isSupported && (
+                      <button
+                        onClick={() => toggleListening('hi-IN')}
+                        className={cn(
+                          "p-1 rounded-full transition-all",
+                          isListening ? "bg-red-500 animate-pulse" : "text-white/40 hover:text-white"
+                        )}
+                      >
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                          <line x1="12" y1="19" x2="12" y2="23" />
+                          <line x1="8" y1="23" x2="16" y2="23" />
+                        </svg>
+                      </button>
+                    )}
                     {(searchValue || searchQuery) && (
                       <XCircle
                         className="w-3.5 h-3.5 text-white/40 cursor-pointer hover:text-white"
@@ -145,12 +171,22 @@ export const Header = ({ title, shortTitle, subtitle, showSearch = true, searchV
                     onClick={onSearchChange ? () => onSearchChange('') : () => setSearchQuery('')}
                   />
                 )}
-                <svg className="voice-search" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path fill="#4285f4" d="m12 15c1.66 0 3-1.31 3-2.97v-7.02c0-1.66-1.34-3.01-3-3.01s-3 1.34-3 3.01v7.02c0 1.66 1.34 2.97 3 2.97z" />
-                  <path fill="#34a853" d="m11 18.08h2v3.92h-2z" />
-                  <path fill="#fbbc05" d="m7.05 16.87c-1.27-1.33-2.05-2.83-2.05-4.87h2c0 1.45 0.56 2.42 1.47 3.38v0.32l-1.15 1.18z" />
-                  <path fill="#ea4335" d="m12 16.93a4.97 5.25 0 0 1 -3.54 -1.55l-1.41 1.49c1.26 1.34 3.02 2.13 4.95 2.13 3.87 0 6.99-2.92 6.99-7h-1.99c0 2.92-2.24 4.93-5 4.93z" />
-                </svg>
+                <div
+                  className={cn(
+                    "voice-search-container flex items-center gap-1 p-1 rounded-full px-2 transition-all cursor-pointer",
+                    isListening ? "bg-red-50 text-red-500 shadow-inner" : "hover:bg-slate-100"
+                  )}
+                  onClick={() => toggleListening('hi-IN')}
+                  title={isListening ? "Listening... Speak now" : "Voice Search (Hindi/English)"}
+                >
+                  <svg className={cn("voice-search w-5 h-5 transition-all", isListening && "animate-pulse scale-110")} role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path fill={isListening ? "#ef4444" : "#4285f4"} d="m12 15c1.66 0 3-1.31 3-2.97v-7.02c0-1.66-1.34-3.01-3-3.01s-3 1.34-3 3.01v7.02c0 1.66 1.34 2.97 3 2.97z" />
+                    <path fill={isListening ? "#ef4444" : "#34a853"} d="m11 18.08h2v3.92h-2z" />
+                    <path fill={isListening ? "#ef4444" : "#fbbc05"} d="m7.05 16.87c-1.27-1.33-2.05-2.83-2.05-4.87h2c0 1.45 0.56 2.42 1.47 3.38v0.32l-1.15 1.18z" />
+                    <path fill={isListening ? "#ef4444" : "#ea4335"} d="m12 16.93a4.97 5.25 0 0 1 -3.54 -1.55l-1.41 1.49c1.26 1.34 3.02 2.13 4.95 2.13 3.87 0 6.99-2.92 6.99-7h-1.99c0 2.92-2.24 4.93-5 4.93z" />
+                  </svg>
+                  {isListening && <span className="text-[10px] font-black uppercase animate-pulse">Lsn...</span>}
+                </div>
               </div>
             </div>
           </div>
